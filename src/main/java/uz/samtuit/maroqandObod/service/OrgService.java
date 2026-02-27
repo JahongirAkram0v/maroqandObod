@@ -18,10 +18,6 @@ public class OrgService {
         orgRepo.save(org);
     }
 
-    public Optional<Org> findByInn(String inn) {
-        return orgRepo.findByInn(inn);
-    }
-
     public Optional<Org> findByChatId(Long id) {
         return orgRepo.findByChatId(id);
     }
@@ -29,6 +25,4 @@ public class OrgService {
     public List<Org> findAll() {
         return orgRepo.findAll();
     }
-
-
 }

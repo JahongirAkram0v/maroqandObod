@@ -5,15 +5,17 @@ import org.springframework.stereotype.Component;
 import uz.samtuit.maroqandObod.model.Admin;
 import uz.samtuit.maroqandObod.model.AdminState;
 import uz.samtuit.maroqandObod.model.Org;
+import uz.samtuit.maroqandObod.model.OrgInfo;
 import uz.samtuit.maroqandObod.service.AdminService;
+import uz.samtuit.maroqandObod.service.OrgInfoService;
 import uz.samtuit.maroqandObod.service.OrgService;
 
 @Component
 @RequiredArgsConstructor
-public class SuperAdminService {
+public class BotAdminService {
 
     private final AdminService adminService;
-    private final OrgService orgService;
+    private final OrgInfoService orgInfoService;
 
     public void handleAdminMessage(Admin admin, String text) {
         AdminState adminState = admin.getState();
@@ -35,12 +37,12 @@ public class SuperAdminService {
                     System.out.println("Noto'g'ri format.");
                     return;
                 }
-                Org org = Org.builder()
+                OrgInfo orgInfo = OrgInfo.builder()
                         .inn(texts[0].trim())
                         .password(texts[1].trim())
                         .name(texts[2].trim())
                         .build();
-                orgService.save(org);
+                orgInfoService.save(orgInfo);
                 admin.setState(AdminState.SETUP);
                 adminService.save(admin);
                 System.out.println("f");

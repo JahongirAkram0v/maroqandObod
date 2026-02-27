@@ -7,11 +7,13 @@ import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import uz.samtuit.maroqandObod.botService.SingUpService;
-import uz.samtuit.maroqandObod.botService.SuperAdminService;
+import uz.samtuit.maroqandObod.botService.*;
 import uz.samtuit.maroqandObod.model.Admin;
 import uz.samtuit.maroqandObod.model.Org;
+import uz.samtuit.maroqandObod.model.OrgInfo;
+import uz.samtuit.maroqandObod.model.OrgState;
 import uz.samtuit.maroqandObod.service.AdminService;
+import uz.samtuit.maroqandObod.service.OrgInfoService;
 import uz.samtuit.maroqandObod.service.OrgService;
 
 import java.util.Optional;
@@ -25,10 +27,16 @@ public class MyBot extends TelegramWebhookBot {
     private final String botWebhookPath = dotenv.get("TELEGRAM_BOT_WEBHOOK_PATH");
     private final String adminId = dotenv.get("TELEGRAM_ADMIN_ID");
 
-    private final OrgService orgService;
     private final AdminService adminService;//
-    private final SuperAdminService superAdminService;
+    private final BotAdminService botAdminService;
+
+    private final SendService sendService;
+
+    private final OrgService orgService;
+    private final OrgInfoService orgInfoService;
+
     private final SingUpService singUpService;
+    private final BotOrgService botOrgService;
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
@@ -48,75 +56,47 @@ public class MyBot extends TelegramWebhookBot {
                                 adminService.save(a);
                                 return a;
                             });
-                    superAdminService.handleAdminMessage(admin, text);
+                    botAdminService.handleAdminMessage(admin, text);
                 }
             }
             else {
                 Optional<Org> optionalOrg = orgService.findByChatId(chatId);
                 if (optionalOrg.isPresent()) {
                     Org org = optionalOrg.get();
+                    OrgState orgState = org.getOrgState();
 
-                    singUpService.checkAndHandleOrgMessage(org, message);
-                    //
-                     //nimalar qilishi kerak
-                    String text = message.getText();
-
-                    switch (text) {
-                        case "To'ldi" -> {
-                            org.setFilled(true);
-                            orgService.save(org);
-                            // show message about successful filling and show main menu
-                        }
-                        case "Tahrir" -> {
-                            //boshqa klaviatura yuboraman.
-                        }
-                        case "phone number" -> {
-                            org.setPhoneNumber(null);
-                            orgService.save(org);
-                            // show request for phone number
-                        }
-                        case "location" -> {
-                            org.setLatitude(null);
-                            org.setLongitude(null);
-                            orgService.save(org);
-                            // show request for location
-                        }
-                        case "image" -> {
-                            org.setImageId(null);
-                            orgService.save(org);
-                            // show request for image
-                        }
-                        case "container count" -> {
-                            org.setContainerCount(0);
-                            orgService.save(org);
-                            // show request for container count
-                        }
+                    if (orgState != OrgState.READY && orgState != OrgState.BLOCKED) {
+                        singUpService.handleOrgMessage(org, message);
+                        return null;
                     }
+//                    botOrgService.handleOrgMessage(org, message);
+
                 }
                 else {
+                    //auth
                     String text = message.getText();
-                    if (text.startsWith("/start")) {
-                        //show welcome message
+                    if (text.equals("/start")) {
+                        System.out.println("Iltimos, ro'yxatdan o'tish uchun INN va parolni kiriting");
                         return null;
                     }
                     String[] texts = text.split("\n");
                     if (texts.length != 2) {
-                        //show error message and welcome message
+                        System.out.println("Iltimos, INN va parolni to'g'ri formatda kiriting");
                         return null;
                     }
-                    Optional<Org> newOptionalOrg = orgService.findByInn(texts[0]);
-                    if (newOptionalOrg.isEmpty()) {
-                        //show error message
+                    Optional<OrgInfo> newOptionalOrgInfo = orgInfoService.findByInnAndPassword(texts[0], texts[1]);
+                    if (newOptionalOrgInfo.isEmpty()) {
+                        System.out.println("INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring");
                         return null;
                     }
-                    Org org = newOptionalOrg.get();
-                    if (!org.getPassword().equals(texts[1])) {
-                        //show error message
-                        return null;
-                    }
+                    OrgInfo orgInfo = newOptionalOrgInfo.get();
+                    Org org = Org.builder()
+                            .orgInfo(orgInfo)
+                            .build();
                     org.setChatId(chatId);
                     orgService.save(org);
-                    // welcome message and phone number message
+                    System.out.println("Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring");
+                    sendService.send(Utils.contact(org.getChatId(), "Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring"), "sendMessage");
                 }
             }
         }

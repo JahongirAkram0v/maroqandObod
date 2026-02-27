@@ -17,14 +17,18 @@ public class Org {
     private String id;
     private Long chatId;
 
-    private String inn;
-    private String password;//TODO: passwordni saqlash uchun maxsus usul qo'llash kerak, masalan, hashing
-    private String name;
-
     private String phoneNumber;
     private Double latitude;
     private Double longitude;
     private String imageId;
     private int containerCount;
     private boolean isFilled;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private OrgState orgState = OrgState.PHONE_NUMBER;
+
+    @OneToOne
+    @JoinColumn(name = "org_info_id")
+    private OrgInfo orgInfo;
 }
