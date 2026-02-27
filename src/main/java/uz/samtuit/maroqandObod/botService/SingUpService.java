@@ -23,7 +23,7 @@ public class SingUpService {
                     org.setPhoneNumber(phoneNumber);
                     org.setOrgState(OrgState.LOCATION);
                     orgService.save(org);
-                    sendService.send(Utils.location(org.getChatId(), "telefon raqamingiz qabul qilindi"), "sendMessage");
+                    sendService.send(Utils.location(org.getChatId(), "joylashuv ma'lumotlarini kiriting"), "sendMessage");
                 }
             }
             case LOCATION -> {
@@ -41,7 +41,7 @@ public class SingUpService {
                     org.setImageId(fileId);
                     org.setOrgState(OrgState.CONTAINER_COUNT);
                     orgService.save(org);
-                    sendService.send(Utils.text(org.getChatId(), "idoralar sonini yuboring"), "sendMessage");
+                    sendService.send(Utils.text(org.getChatId(), "kontaynerlar sonini yuboring"), "sendMessage");
                 }
             }
             case CONTAINER_COUNT -> {
@@ -51,12 +51,12 @@ public class SingUpService {
                         org.setContainerCount(containerCount);
                         org.setOrgState(OrgState.READY);
                         orgService.save(org);
-                        sendService.send(Utils.text(org.getChatId(), "ro'yxatdan o'tdingiz"), "sendMessage");
+                        sendService.send(Utils.orgKeyboard(org.getChatId(), "ro'yxatdan o'tdingiz", org.isFilled()), "sendMessage");
                     } else {
-                        sendService.send(Utils.text(org.getChatId(), "idoralar sonini to'g'ri yuboring"), "sendMessage");
+                        sendService.send(Utils.text(org.getChatId(), "kontaynerlar sonini to'g'ri yuboring"), "sendMessage");
                     }
                 } catch (NumberFormatException e) {
-                    sendService.send(Utils.text(org.getChatId(), "idoralar sonini to'g'ri yuboring"), "sendMessage");
+                    sendService.send(Utils.text(org.getChatId(), "kontaynerlar sonini to'g'ri yuboring"), "sendMessage");
                 }
             }
         }

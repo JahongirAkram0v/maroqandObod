@@ -21,8 +21,4 @@ public class OrgService {
     public Optional<Org> findByChatId(Long id) {
         return orgRepo.findByChatId(id);
     }
-
-    public List<Org> findAll() {
-        return orgRepo.findAll();
-    }
 }

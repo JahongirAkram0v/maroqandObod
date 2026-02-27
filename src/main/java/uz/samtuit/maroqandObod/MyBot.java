@@ -69,34 +69,54 @@ public class MyBot extends TelegramWebhookBot {
                         singUpService.handleOrgMessage(org, message);
                         return null;
                     }
-//                    botOrgService.handleOrgMessage(org, message);
+                    if (message.hasText()) {
+                        botOrgService.handleOrgMessage(org, message.getText());
+                    }
 
                 }
                 else {
                     //auth
                     String text = message.getText();
                     if (text.equals("/start")) {
-                        System.out.println("Iltimos, ro'yxatdan o'tish uchun INN va parolni kiriting");
+                        sendService.send(Utils.contact(
+                                        chatId,
+                                        "Iltimos, ro'yxatdan o'tish uchun INN va parolni kiriting"),
+                                "sendMessage");
                         return null;
                     }
                     String[] texts = text.split("\n");
                     if (texts.length != 2) {
-                        System.out.println("Iltimos, INN va parolni to'g'ri formatda kiriting");
+                        sendService.send(Utils.contact(
+                                        chatId,
+                                        "Iltimos, INN va parolni to'g'ri formatda kiriting"),
+                                "sendMessage");
                         return null;
                     }
                     Optional<OrgInfo> newOptionalOrgInfo = orgInfoService.findByInnAndPassword(texts[0], texts[1]);
                     if (newOptionalOrgInfo.isEmpty()) {
-                        System.out.println("INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring");
+                        sendService.send(Utils.contact(
+                                        chatId,
+                                        "INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring"),
+                                "sendMessage");
                         return null;
                     }
                     OrgInfo orgInfo = newOptionalOrgInfo.get();
+                    if (orgInfo.getOrg() != null) {
+                        sendService.send(Utils.contact(
+                                        chatId,
+                                        "Bu INN bilan ro'yxatdan o'tilgan, iltimos boshqa INN bilan urinib ko'ring"),
+                                "sendMessage");
+                        return null;
+                    }
                     Org org = Org.builder()
                             .orgInfo(orgInfo)
                             .build();
                     org.setChatId(chatId);
                     orgService.save(org);
-                    System.out.println("Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring");
-                    sendService.send(Utils.contact(org.getChatId(), "Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring"), "sendMessage");
+                    sendService.send(Utils.contact(
+                            chatId,
+                            "Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring"),
+                            "sendMessage");
                 }
             }
         }
