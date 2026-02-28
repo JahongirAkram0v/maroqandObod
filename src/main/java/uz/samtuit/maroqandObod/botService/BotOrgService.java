@@ -22,9 +22,19 @@ public class BotOrgService {
             sendService.send(Utils.text(org.getChatId(), "Ma'lumotlar yuborilgan"), "sendMessage");
             return;
         }
-        org.setFilled(true);
-        orgService.save(org);
-        sendService.send(Utils.orgKeyboard(org.getChatId(), "Ma'llumotlar yuborildi.", true), "sendMessage");
-        sendService.send(Utils.text(adminChatId,  org.getOrgInfo().getName()+" da konteyner toldi"), "sendMessage");
+        switch (text) {
+            case "bo'sh" -> {
+                sendService.send(Utils.agreementKeyboard(org.getChatId(), "Ma'lumotlaringizni o'zgartirish uchun quyidagi tugmani bosing"), "sendMessage");
+            }
+            case "Yes" -> {
+                org.setFilled(true);
+                orgService.save(org);
+                sendService.send(Utils.orgKeyboard(org.getChatId(), "Ma'lumotlar yuborildi.", true), "sendMessage");
+                sendService.send(Utils.text(adminChatId, org.getOrgInfo().getName() + " da konteyner toldi"), "sendMessage");
+            }
+            case "No" -> {
+                sendService.send(Utils.orgKeyboard(org.getChatId(), "Ma'lumotlaringizni o'zgartirilmadi", false), "sendMessage");
+            }
+        }
     }
 }

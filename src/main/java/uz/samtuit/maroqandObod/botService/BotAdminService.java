@@ -1,16 +1,25 @@
 package uz.samtuit.maroqandObod.botService;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.samtuit.maroqandObod.model.Admin;
 import uz.samtuit.maroqandObod.model.AdminState;
+import uz.samtuit.maroqandObod.model.Org;
 import uz.samtuit.maroqandObod.model.OrgInfo;
 import uz.samtuit.maroqandObod.service.AdminService;
 import uz.samtuit.maroqandObod.service.OrgInfoService;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @Component
 @RequiredArgsConstructor
 public class BotAdminService {
+
+    private final Dotenv dotenv = Dotenv.load();
+    private final String botUsername = dotenv.get("TELEGRAM_BOT_USERNAME");
 
     private final AdminService adminService;
     private final OrgInfoService orgInfoService;
@@ -19,63 +28,200 @@ public class BotAdminService {
     public void handleAdminMessage(Admin admin, String text) {
         AdminState adminState = admin.getState();
 
-        switch (adminState) {
-            case SETUP -> {
-                if (text.equals("add")) {
-                    admin.setState(AdminState.CREATE_ORG);
-                    adminService.save(admin);
-                    sendService.send(Utils.text(admin.getId(), "Tashkilot ma'lumotlarini yuboring (INN, parol, nom)"),
-                            "sendMessage");
-                    return;
-                }
-                if (text.equals("all")) {
-                    StringBuilder sb = new StringBuilder();
-                    orgInfoService.findAll().forEach(
-                            orgInfo -> sb.append(orgInfo.getName()).append(orgInfo.getOrg().isFilled()?" y\n":" n\n")
-                    );
-                    sendService.send(Utils.adminKeyboard(
-                                    admin.getId(),
-                                    sb.toString()),
-                            "sendMessage");
-                    return;
-                }
-                if (text.startsWith("/start ")) {
-                    String[] parts = text.substring(text.indexOf(" ")+1).split("_");
-                    if (parts.length == 2) {
-                        System.out.println(parts[0]);
-                        System.out.println(parts[1]);
-                        return;
-                    }
-                }
-                if (text.equals("/start")) {
-                    sendService.send(Utils.adminKeyboard(
-                                    admin.getId(),
-                                    "Xush kelibsiz!"),
-                            "sendMessage");
-                }
-            }
-            case CREATE_ORG -> {
-                String[] texts = text.split("\n");
-                if (texts.length != 3) {
-                    sendService.send(Utils.adminKeyboard(
-                                    admin.getId(),
-                                    "Noto'g'ri format."),
-                            "sendMessage");
-                    return;
-                }
-                OrgInfo orgInfo = OrgInfo.builder()
-                        .inn(texts[0].trim())
-                        .password(texts[1].trim())
-                        .name(texts[2].trim())
-                        .build();
-                orgInfoService.save(orgInfo);
-                admin.setState(AdminState.SETUP);
+        if (adminState == AdminState.SETUP) {
+            if (text.equals("\uD83D\uDDC2 Tashkilot qo‘shish")) {
+                admin.setState(AdminState.CREATE_ORG);
                 adminService.save(admin);
+                sendService.send(Utils.text(admin.getId(), "yaxshiroq misol yozaman"),
+                        "sendMessage");
+                return;
+            }
+            if (text.equals("📋 Tashkilotlar ro‘yxati")) {
+
+                List<OrgInfo> orgInfos = orgInfoService.findAll();
+                if (orgInfos.isEmpty()) {
+                    sendService.send(
+                            Utils.text(admin.getId(), "Hozircha tashkilotlar mavjud emas."),
+                            "sendMessage"
+                    );
+                    return;
+                }
+
+                StringBuilder sb = new StringBuilder();
+                List<Map<String, Object>> entities = new ArrayList<>();
+
+                String title = "📋 Tashkilotlar ro‘yxati";
+                sb.append(title).append("\n\n");
+
+                entities.add(Map.of(
+                        "type", "bold",
+                        "offset", 0,
+                        "length", title.length()
+                ));
+
+                for (OrgInfo orgInfo : orgInfos) {
+                    appendOrgLine(sb, entities, orgInfo);
+                }
+
+                sendService.send(
+                        Utils.textEntity(admin.getId(), sb.toString(), entities),
+                        "sendMessage"
+                );
+                return;
+            }
+            if (text.startsWith("/start ")) {
+
+                int spaceIdx = text.indexOf(' ');
+                if (spaceIdx < 0 || spaceIdx + 1 >= text.length()) {
+                    return;
+                }
+                String payload = text.substring(spaceIdx + 1).trim();
+                if (payload.isEmpty()) return;
+
+                String[] parts = payload.split("_", 2);
+                String a = parts[0];
+                String b = parts[1];
+                if (a.isBlank() || b.isBlank()) return;
+
+                System.out.println(a);
+                System.out.println(b);
+            }
+
+            if (text.equals("/start")) {
                 sendService.send(Utils.adminKeyboard(
                                 admin.getId(),
-                                "Tashkilot qo'shildi."),
+                                "Xush kelibsiz!"),
                         "sendMessage");
             }
         }
+        else if (adminState == AdminState.CREATE_ORG) {
+            String[] rows = text.split("\\R");
+            int success = rows.length;
+
+            for (String row : rows) {
+                row = row.trim();
+                if (row.isBlank()) {
+                    success--;
+                    continue;
+                }
+
+                String[] columns = row.split("\\s+");
+                if (columns.length != 3) {
+                    success--;
+                    continue;
+                }
+                if (columns[0].isBlank() && columns[1].isBlank() && columns[2].isBlank()) {
+                    success--;
+                    continue;
+                }
+
+                String inn = columns[0];
+                String name = columns[1];
+                if (name.length() > 20) {
+                    name = name.substring(20);
+                }
+                String password = columns[2];
+
+                OrgInfo orgInfo = OrgInfo.builder()
+                        .inn(inn)
+                        .name(name)
+                        .password(password)
+                        .build();
+                orgInfoService.save(orgInfo);
+            }
+            admin.setState(AdminState.SETUP);
+            adminService.save(admin);
+            if (success != 0) {
+                sendService.send(Utils.text(
+                        admin.getId(),
+                        success + "ta tashkilotlar yaratildi!"),
+                        "sendMessage");
+            } else {
+                sendService.send(Utils.text(
+                        admin.getId(),
+                        "Tashkilot yaratilmadi, iltimos formatga e'tibor bering!"),
+                        "sendMessage");
+            }
+            //Hali ham kamchilik bor!!
+        }
     }
+
+    private void appendOrgLine(
+            StringBuilder sb,
+            List<Map<String, Object>> entities,
+            OrgInfo orgInfo
+    ) {
+
+        String name = orgInfo.getName();
+        sb.append(name);
+        entities.add(
+                Map.of(
+                        "type", "italic",
+                        "offset", 0,
+                        "length", sb.length()
+                )
+        );
+        if (orgInfo.getOrg() == null) {
+            sb.append("⚠️   ");
+            controller(sb, entities, orgInfo);
+            return;
+        }
+        sb.append(" ".repeat(Math.max(0, 20 - name.length() + 1)));
+
+        Org org = orgInfo.getOrg();
+        String status = (org.isFilled() ? " ♻️ " : " \uD83D\uDDD1 ");
+
+        sb.append(status);
+
+        String share = "📥";
+        entities.add(
+                Map.of(
+                "type", "text_link",
+                "offset", sb.length(),
+                "length", share.length(),
+                "url", "https://t.me/" + botUsername + "?start=share_" + orgInfo.getInn()
+                )
+        );
+        sb.append(share).append(" ");
+
+        if (org.isFilled()) {
+            String done = "☑️";
+            entities.add(
+                    Map.of(
+                            "type", "text_link",
+                            "offset", sb.length(),
+                            "length", done.length(),
+                            "url", "https://t.me/" + botUsername + "?start=done_" + orgInfo.getInn()
+                    )
+            );
+            sb.append(done).append(" ");
+        }
+
+        controller(sb, entities, orgInfo);
+    }
+
+    private void controller(StringBuilder sb, List<Map<String, Object>> entities, OrgInfo orgInfo) {
+        String edit = "✏️";
+        entities.add(
+                Map.of(
+                        "type", "text_link",
+                        "offset", sb.length(),
+                        "length", edit.length(),
+                        "url", "https://t.me/" + botUsername + "?start=edit_" + orgInfo.getInn()
+                )
+        );
+        sb.append(edit);
+
+        String delete = "❌";
+        entities.add(
+                Map.of(
+                        "type", "text_link",
+                        "offset", sb.length(),
+                        "length", delete.length(),
+                        "url", "https://t.me/" + botUsername + "?start=delete_" + orgInfo.getInn()
+                )
+        );
+        sb.append(delete).append("\n");
+    }
+
 }

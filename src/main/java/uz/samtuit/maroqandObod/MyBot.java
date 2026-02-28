@@ -47,7 +47,6 @@ public class MyBot extends TelegramWebhookBot {
 
             if (adminId.equals(chatId.toString())) {
                 if (message.hasText()) {
-                    String text = message.getText();
                     Admin admin = adminService.findById(chatId)
                             .orElseGet(() -> {
                                 Admin a = Admin.builder()
@@ -56,7 +55,9 @@ public class MyBot extends TelegramWebhookBot {
                                 adminService.save(a);
                                 return a;
                             });
-                    botAdminService.handleAdminMessage(admin, text);
+                    if (message.hasText()) {
+                        botAdminService.handleAdminMessage(admin, message.getText());
+                    }
                 }
             }
             else {
@@ -76,9 +77,10 @@ public class MyBot extends TelegramWebhookBot {
                 }
                 else {
                     //auth
+                    if (!message.hasText()) return null;
                     String text = message.getText();
                     if (text.equals("/start")) {
-                        sendService.send(Utils.contact(
+                        sendService.send(Utils.text(
                                         chatId,
                                         "Iltimos, ro'yxatdan o'tish uchun INN va parolni kiriting"),
                                 "sendMessage");
@@ -86,7 +88,7 @@ public class MyBot extends TelegramWebhookBot {
                     }
                     String[] texts = text.split("\n");
                     if (texts.length != 2) {
-                        sendService.send(Utils.contact(
+                        sendService.send(Utils.text(
                                         chatId,
                                         "Iltimos, INN va parolni to'g'ri formatda kiriting"),
                                 "sendMessage");
@@ -94,7 +96,7 @@ public class MyBot extends TelegramWebhookBot {
                     }
                     Optional<OrgInfo> newOptionalOrgInfo = orgInfoService.findByInnAndPassword(texts[0], texts[1]);
                     if (newOptionalOrgInfo.isEmpty()) {
-                        sendService.send(Utils.contact(
+                        sendService.send(Utils.text(
                                         chatId,
                                         "INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring"),
                                 "sendMessage");
@@ -102,7 +104,7 @@ public class MyBot extends TelegramWebhookBot {
                     }
                     OrgInfo orgInfo = newOptionalOrgInfo.get();
                     if (orgInfo.getOrg() != null) {
-                        sendService.send(Utils.contact(
+                        sendService.send(Utils.text(
                                         chatId,
                                         "Bu INN bilan ro'yxatdan o'tilgan, iltimos boshqa INN bilan urinib ko'ring"),
                                 "sendMessage");

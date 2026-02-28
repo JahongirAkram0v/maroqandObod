@@ -32,7 +32,7 @@ public class SingUpService {
                     org.setLongitude(message.getLocation().getLongitude());
                     org.setOrgState(OrgState.IMAGE);
                     orgService.save(org);
-                    sendService.send(Utils.text(org.getChatId(), "rasm yuboring"), "sendMessage");
+                    sendService.send(Utils.removeKeyboard(org.getChatId(), "rasm yuboring"), "sendMessage");
                 }
             }
             case IMAGE -> {
