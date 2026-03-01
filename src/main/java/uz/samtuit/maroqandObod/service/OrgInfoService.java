@@ -26,15 +26,11 @@ public class OrgInfoService {
         orgInfoRepo.save(orgInfo);
     }
 
-    public Optional<String> findNameByInn(String inn) {
-        return orgInfoRepo.findNameByInn(inn);
-    }
-
-    public Optional<OrgInfo> findByInn(String inn) {
-        return orgInfoRepo.findByInn(inn);
-    }
-
     public void deleteOrgInfo(OrgInfo orgInfo) {
         orgInfoRepo.delete(orgInfo);
+    }
+
+    public Optional<OrgInfo> findById(String id) {
+        return orgInfoRepo.findById(id);
     }
 }

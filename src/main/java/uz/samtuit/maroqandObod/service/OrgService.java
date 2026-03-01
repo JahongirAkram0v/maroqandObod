@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uz.samtuit.maroqandObod.model.Org;
 import uz.samtuit.maroqandObod.repo.OrgRepo;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service

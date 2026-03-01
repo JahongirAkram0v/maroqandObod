@@ -43,6 +43,22 @@ public class Utils {
         );
     }
 
+    public static Map<String, Object> sendPhoto(Long id, String fileId, String text) {
+        return Map.of(
+                "chat_id", id,
+                "photo", fileId,
+                "caption", text
+        );
+    }
+
+    public static Map<String, Object> sendLocation(Long id, Double latitude, Double longitude) {
+        return Map.of(
+                "chat_id", id,
+                "latitude", latitude,
+                "longitude", longitude
+        );
+    }
+
     public static Map<String, Object> contact(Long id, String text) {
         return text(id, text, List.of(
                     List.of(

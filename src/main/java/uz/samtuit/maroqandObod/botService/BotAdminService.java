@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.ADD_ORG;
+import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.ALL_ORG;
+
 @Component
 @RequiredArgsConstructor
 public class BotAdminService {
@@ -29,27 +32,130 @@ public class BotAdminService {
     private final SendService sendService;
 
     public void handleAdminMessage(Admin admin, String text) {
+
+        if (text.equals("/start")) {
+            sendService.send(Utils.adminKeyboard(admin.getId(),
+                            "Xush kelibsiz!"
+                    ),"sendMessage");
+            return;
+        }
+
         AdminState adminState = admin.getState();
 
-        if (adminState == AdminState.SETUP) {
-            if (text.equals("\uD83D\uDDC2 Tashkilot qo‘shish")) {
+        switch (adminState) {
+            case SETUP -> adminSetup(text, admin);
+            case CREATE_ORG -> adminCreateOrg(text, admin);
+            case EDIT -> adminEdit(text, admin);
+        }
+    }
+
+    private void adminEdit(String text, Admin admin) {
+        String[] columns = text.split("\\s+");
+        if (columns.length != 3) {
+            sendService.send(Utils.text(
+                            admin.getId(),
+                            "Iltimos, ma'lumotlarni to'g'ri formatda yuboring!"),
+                    "sendMessage");
+            return;
+        }
+        String id = admin.getEditId();
+        if (id == null) {
+            admin.setState(AdminState.SETUP);
+            adminService.save(admin);
+            return;
+        }
+        String newInn = columns[0];
+        String newName = columns[1];
+        String newPassword = columns[2];
+
+        Optional<OrgInfo> optionalOrgInfo = orgInfoService.findById(id);
+        if (optionalOrgInfo.isEmpty()) {
+            admin.setState(AdminState.SETUP);
+            admin.setEditId(null);
+            adminService.save(admin);
+            sendService.send(Utils.text(admin.getId(), "Xatolik ketdi, qaytadan urinib ko'ring"), "sendMessage");
+            return;
+        }
+        OrgInfo orgInfo = optionalOrgInfo.get();
+        orgInfo.setInn(newInn);
+        orgInfo.setName(newName);
+        orgInfo.setPassword(newPassword);
+        orgInfoService.save(orgInfo);
+
+        admin.setState(AdminState.SETUP);
+        admin.setEditId(null);
+        adminService.save(admin);
+        sendService.send(Utils.text(admin.getId(),
+                "Tashkilot ma'lumotlari yangilandi\n" +
+                        newInn + " " + newName + " " + newPassword
+        ),"sendMessage");
+    }
+
+    private void adminCreateOrg(String text, Admin admin) {
+        String[] rows = text.split("\\R");
+        int success = rows.length;
+
+        for (String row : rows) {
+            row = row.trim();
+            if (row.isBlank()) {
+                success--;
+                continue;
+            }
+
+            String[] columns = row.split("\\s+");
+            if (columns.length != 3) {
+                success--;
+                continue;
+            }
+            if (columns[0].isBlank() && columns[1].isBlank() && columns[2].isBlank()) {
+                success--;
+                continue;
+            }
+
+            String inn = columns[0].trim();
+            String name = columns[1].trim();
+            String password = columns[2].trim();
+
+            OrgInfo orgInfo = OrgInfo.builder()
+                    .inn(inn)
+                    .name(name)
+                    .password(password)
+                    .build();
+            orgInfoService.save(orgInfo);
+        }
+        admin.setState(AdminState.SETUP);
+        adminService.save(admin);
+        if (success != 0) {
+            sendService.send(Utils.text(
+                            admin.getId(),
+                            success + "ta tashkilotlar yaratildi!"),
+                    "sendMessage");
+        } else {
+            sendService.send(Utils.text(
+                            admin.getId(),
+                            "Tashkilot yaratilmadi, iltimos formatga e'tibor bering!"),
+                    "sendMessage");
+        }
+    }
+
+    private void adminSetup(String text, Admin admin) {
+        switch (text) {
+            case ADD_ORG -> {
                 admin.setState(AdminState.CREATE_ORG);
                 adminService.save(admin);
-                sendService.send(Utils.text(admin.getId(), "yaxshiroq misol yozaman"),
-                        "sendMessage");
-                return;
+                sendService.send(Utils.text(admin.getId(),
+                                "Ma'lumotlarni quyidagi formatda kiriting:\n" +
+                                        "[123456789 Tashkilot_nomi password]"
+                        ),"sendMessage");
             }
-            if (text.equals("📋 Tashkilotlar ro‘yxati")) {
-
+            case ALL_ORG -> {
                 List<OrgInfo> orgInfos = orgInfoService.findAll();
                 if (orgInfos.isEmpty()) {
-                    sendService.send(
-                            Utils.text(admin.getId(), "Hozircha tashkilotlar mavjud emas."),
-                            "sendMessage"
-                    );
+                    sendService.send(Utils.text(admin.getId(),
+                                    "Hozircha tashkilotlar mavjud emas."
+                            ),"sendMessage");
                     return;
                 }
-
                 StringBuilder sb = new StringBuilder();
                 List<Map<String, Object>> entities = new ArrayList<>();
 
@@ -70,195 +176,77 @@ public class BotAdminService {
                         Utils.textEntity(admin.getId(), sb.toString(), entities),
                         "sendMessage"
                 );
-                return;
-            }
-            if (text.startsWith("/start ")) {
-
-                System.out.println(text);
-                int spaceIdx = text.indexOf(' ');
-                if (spaceIdx < 0 || spaceIdx + 1 >= text.length()) {
-                    return;
-                }
-                String payload = text.substring(spaceIdx + 1).trim();
-                if (payload.isEmpty()) return;
-
-                String[] parts = payload.split("_", 2);
-                String ins = parts[0];
-                String inn = parts[1];
-                if (ins.isBlank() || inn.isBlank()) return;
-                List<String> validActions = List.of("done", "edit", "delete");
-                if (!validActions.contains(ins)) return;
-                Optional<String> optionalName = orgInfoService.findNameByInn(inn);
-                if (optionalName.isEmpty()) return;
-                admin.setState(AdminState.AGREEMENT);
-                admin.setInstructionsName(ins);
-                admin.setInstructionsInn(inn);
-                adminService.save(admin);
-                sendAgreementKeyboard(admin.getId(), ins, optionalName.get());
-            }
-
-            if (text.equals("/start")) {
-                sendService.send(Utils.adminKeyboard(
-                                admin.getId(),
-                                "Xush kelibsiz!"),
-                        "sendMessage");
             }
         }
-        else if (adminState == AdminState.CREATE_ORG) {
-            String[] rows = text.split("\\R");
-            int success = rows.length;
+        if (text.startsWith("/start ")) {
 
-            for (String row : rows) {
-                row = row.trim();
-                if (row.isBlank()) {
-                    success--;
-                    continue;
-                }
+            String payload = text.substring(text.indexOf(' ') + 1).trim();
 
-                String[] columns = row.split("\\s+");
-                if (columns.length != 3) {
-                    success--;
-                    continue;
-                }
-                if (columns[0].isBlank() && columns[1].isBlank() && columns[2].isBlank()) {
-                    success--;
-                    continue;
-                }
-
-                String inn = columns[0].trim();
-                String name = columns[1].trim();
-                if (name.length() > 20) {
-                    name = name.substring(20);
-                }
-                String password = columns[2].trim();
-
-                OrgInfo orgInfo = OrgInfo.builder()
-                        .inn(inn)
-                        .name(name)
-                        .password(password)
-                        .build();
-                orgInfoService.save(orgInfo);
-            }
-            admin.setState(AdminState.SETUP);
-            adminService.save(admin);
-            if (success != 0) {
-                sendService.send(Utils.text(
-                                admin.getId(),
-                                success + "ta tashkilotlar yaratildi!"),
-                        "sendMessage");
-            } else {
-                sendService.send(Utils.text(
-                                admin.getId(),
-                                "Tashkilot yaratilmadi, iltimos formatga e'tibor bering!"),
-                        "sendMessage");
-            }
-            //Hali ham kamchilik bor!!
-        }
-        else if (adminState == AdminState.AGREEMENT) {
-            if (text.equals("No")) {
-                admin.setState(AdminState.SETUP);
-                admin.setInstructionsName(null);
-                admin.setInstructionsInn(null);
-                adminService.save(admin);
-                sendService.send(Utils.text(
-                                admin.getId(),
-                                "Amal bekor qilindi!"),
-                        "sendMessage");
-            }
-            else if (text.equals("Yes")) {
-                String inn = admin.getInstructionsInn();
-                String ins = admin.getInstructionsName();
-
-                switch (ins) {
-                    case "done" -> {
-                        Optional<OrgInfo> optionalOrgInfo = orgInfoService.findByInn(inn);
-                        if (optionalOrgInfo.isEmpty()) {
-                            sendService.send(Utils.text(admin.getId(), "Tashkilot topilmadi!"), "sendMessage");
-                            return;
-                        }
-                        OrgInfo orgInfo = optionalOrgInfo.get();
-                        Org org = orgInfo.getOrg();
-                        if (org == null) {
-                            sendService.send(Utils.text(admin.getId(), "⚠️"), "sendMessage");
-                            return;
-                        }
-                        org.setFilled(false);
-                        orgInfoService.save(orgInfo);
-                        sendService.send(Utils.text(
-                                        admin.getId(),
-                                        orgInfo.getName() + "dagi konteyner bo'shatildi!"),
-                                "sendMessage");
-                        admin.setState(AdminState.SETUP);
-                        admin.setInstructionsName(null);
-                        admin.setInstructionsInn(null);
-                        adminService.save(admin);
-                    }
-                    case "edit" -> {
-                        admin.setState(AdminState.EDIT);
-                        adminService.save(admin);
-                        sendService.send(Utils.text(
-                                        admin.getId(),
-                                        "Tashkilot ma'lumotlarini yangilash uchun quyidagi formatda ma'lumotlarni yuboring:\nINN YangiNomi YangiParoli\nMisol: 1234567890 NewName newpassword"),
-                                "sendMessage");
-                    }
-                    case "delete" -> {
-                        Optional<OrgInfo> optionalOrgInfo = orgInfoService.findByInn(inn);
-                        if (optionalOrgInfo.isEmpty()) {
-                            sendService.send(Utils.text(admin.getId(), "Tashkilot topilmadi!"), "sendMessage");
-                            return;
-                        }
-                        OrgInfo orgInfo = optionalOrgInfo.get();
-                        Org org = orgInfo.getOrg();
-                        if (org != null) {
-                            orgService.deleteOrg(org);
-                        }
-                        orgInfoService.deleteOrgInfo(orgInfo);
-                        sendService.send(Utils.text(
-                                        admin.getId(),
-                                        orgInfo.getName() + " tashkiloti o'chirildi!"),
-                                "sendMessage");
-                        admin.setState(AdminState.SETUP);
-                        admin.setInstructionsName(null);
-                        admin.setInstructionsInn(null);
-                        adminService.save(admin);
-                    }
-
-                }
-            }
-        }
-        else if (adminState == AdminState.EDIT) {
-            String[] columns = text.split("\\s+");
-            if (columns.length != 3) {
-                sendService.send(Utils.text(
-                                admin.getId(),
-                                "Iltimos, ma'lumotlarni to'g'ri formatda yuboring!"),
-                        "sendMessage");
-                return;
-            }
-            String inn = admin.getInstructionsInn();
-            String newInn = columns[0];
-            String newName = columns[1];
-            String newPassword = columns[2];
-
-            Optional<OrgInfo> optionalOrgInfo = orgInfoService.findByInn(inn);
+            String[] parts = payload.split("_", 2);
+            String ins = parts[0];
+            String id = parts[1];
+            if (ins.isBlank() || id.isBlank()) return;
+            Optional<OrgInfo> optionalOrgInfo = orgInfoService.findById(id);
             if (optionalOrgInfo.isEmpty()) {
-                sendService.send(Utils.text(admin.getId(), "Tashkilot topilmadi!"), "sendMessage");
+                sendService.send(Utils.text(admin.getId(),
+                        "Xatolik ketdi: link, org mavjud emas"
+                ), "sendMessage");
                 return;
             }
             OrgInfo orgInfo = optionalOrgInfo.get();
-            orgInfo.setInn(newInn);
-            orgInfo.setName(newName);
-            orgInfo.setPassword(newPassword);
-            orgInfoService.save(orgInfo);
 
-            admin.setState(AdminState.SETUP);
-            admin.setInstructionsName(null);
-            admin.setInstructionsInn(null);
-            adminService.save(admin);
-            sendService.send(Utils.text(
-                            admin.getId(),
-                            orgInfo.getName() + " tashkiloti yangilandi!"),
-                    "sendMessage");
+            switch (ins) {
+                case "share" -> {
+                    Org org = orgInfo.getOrg();
+                    if (org == null) {
+                        sendService.send(Utils.text(admin.getId(),
+                                "Tashkilot hali ro'yxatdan o'tmagan"
+                        ), "sendMessage");
+                        return;
+                    }
+                    sendService.send(Utils.sendPhoto(admin.getId(), org.getImageId(),
+                            "Tashkilot nomi: " + orgInfo.getName() + "\n" +
+                                    "Telefon raqami: " + org.getPhoneNumber()
+                            ), "sendPhoto");
+                    sendService.send(
+                            Utils.sendLocation(admin.getId(), org.getLatitude(), org.getLongitude()),
+                            "sendLocation");
+                }
+                case "done" -> {
+                    Org org = orgInfo.getOrg();
+                    if (org == null) {
+                        sendService.send(Utils.text(admin.getId(),
+                                "Tashkilot hali ro'yxatdan o'tmagan"
+                        ), "sendMessage");
+                        return;
+                    }
+                    org.setFilled(false);
+                    orgService.save(org);
+                    sendService.send(
+                            Utils.orgKeyboard(org.getChatId(), "Chiqindi olib ketildi", false),
+                            "sendMessage");
+                    sendService.send(Utils.text(admin.getId(), "Ma'lumot yangilandi"), "sendMessage");
+                }
+                case "edit" -> {
+                    admin.setEditId(id);
+                    admin.setState(AdminState.EDIT);
+                    adminService.save(admin);
+                    sendService.send(Utils.text(admin.getId(),
+                            "Ma'lumotlarni o'zgartirishingiz mumkin\nEski ma'lumotlar: " +
+                                    orgInfo.getInn() + " " + orgInfo.getName() + " " + orgInfo.getPassword()
+                            ), "sendMessage");
+                }
+                case "delete" -> {
+                    Org org = orgInfo.getOrg();
+                    if (org != null) {
+                        orgService.deleteOrg(org);
+                    }
+                    orgInfoService.deleteOrgInfo(orgInfo);
+                    sendService.send(Utils.text(admin.getId(),
+                            "Tashkilot ma'lumotlari butunlay ochirildi!"
+                    ), "sendMessage");
+                }
+            }
         }
     }
 
@@ -268,25 +256,23 @@ public class BotAdminService {
             OrgInfo orgInfo
     ) {
 
-        String name = orgInfo.getName();
-        sb.append(name);
-        entities.add(
-                Map.of(
+        String inn = orgInfo.getInn();
+        entities.add(Map.of(
                         "type", "italic",
-                        "offset", 0,
-                        "length", sb.length()
-                )
-        );
+                        "offset", sb.length(),
+                        "length", inn.length()
+        ));
+        sb.append(inn);
+
         if (orgInfo.getOrg() == null) {
-            sb.append("⚠️   ");
+            sb.append("⚠️          ");
             controller(sb, entities, orgInfo);
             return;
         }
-        sb.append(" ".repeat(Math.max(0, 20 - name.length() + 1)));
+        sb.append("          ");
 
         Org org = orgInfo.getOrg();
         String status = (org.isFilled() ? " ♻️ " : " \uD83D\uDDD1 ");
-
         sb.append(status);
 
         String share = "📥";
@@ -295,7 +281,7 @@ public class BotAdminService {
                         "type", "text_link",
                         "offset", sb.length(),
                         "length", share.length(),
-                        "url", "https://t.me/" + botUsername + "?start=share_" + orgInfo.getInn()
+                        "url", "https://t.me/" + botUsername + "?start=share_" + orgInfo.getId().trim()
                 )
         );
         sb.append(share).append(" ");
@@ -307,10 +293,10 @@ public class BotAdminService {
                             "type", "text_link",
                             "offset", sb.length(),
                             "length", done.length(),
-                            "url", "https://t.me/" + botUsername + "?start=done_" + orgInfo.getInn()
+                            "url", "https://t.me/" + botUsername + "?start=done_" + orgInfo.getId().trim()
                     )
             );
-            sb.append(done).append(" ");
+            sb.append(done).append("  ");
         }
 
         controller(sb, entities, orgInfo);
@@ -323,7 +309,7 @@ public class BotAdminService {
                         "type", "text_link",
                         "offset", sb.length(),
                         "length", edit.length(),
-                        "url", "https://t.me/" + botUsername + "?start=edit_" + orgInfo.getInn()
+                        "url", "https://t.me/" + botUsername + "?start=edit_" + orgInfo.getId().trim()
                 )
         );
         sb.append(edit);
@@ -334,21 +320,9 @@ public class BotAdminService {
                         "type", "text_link",
                         "offset", sb.length(),
                         "length", delete.length(),
-                        "url", "https://t.me/" + botUsername + "?start=delete_" + orgInfo.getInn()
+                        "url", "https://t.me/" + botUsername + "?start=delete_" + orgInfo.getId().trim()
                 )
         );
         sb.append(delete).append("\n");
-    }
-
-    private void sendAgreementKeyboard(Long id, String ins, String orgName) {
-        System.out.println("!!!");
-        switch (ins) {
-            case "done" ->
-                    sendService.send(Utils.agreementKeyboard(id, orgName + "dagi konteyneri bo'shadimi?"), "sendMessage");
-            case "edit" ->
-                    sendService.send(Utils.agreementKeyboard(id, orgName + "ning ma'lumotlarini o'zgartirmoqchimisiz?"), "sendMessage");
-            case "delete" ->
-                    sendService.send(Utils.agreementKeyboard(id, orgName + "ni butunlay o'chirmoqchimisiz?"), "sendMessage");
-        }
     }
 }
