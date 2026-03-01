@@ -21,4 +21,8 @@ public class OrgService {
     public Optional<Org> findByChatId(Long id) {
         return orgRepo.findByChatId(id);
     }
+
+    public void deleteOrg(Org org) {
+        orgRepo.delete(org);
+    }
 }

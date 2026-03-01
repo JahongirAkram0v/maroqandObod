@@ -19,4 +19,6 @@ public class Admin {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private AdminState state = AdminState.SETUP;
+    private String instructionsName;
+    private String instructionsInn;
 }
