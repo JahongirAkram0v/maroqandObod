@@ -112,8 +112,8 @@ public class MyBot extends TelegramWebhookBot {
                     }
                     Org org = Org.builder()
                             .orgInfo(orgInfo)
+                            .chatId(chatId)
                             .build();
-                    org.setChatId(chatId);
                     orgService.save(org);
                     sendService.send(Utils.contact(
                             chatId,

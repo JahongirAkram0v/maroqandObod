@@ -3,10 +3,7 @@ package uz.samtuit.maroqandObod.botService;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uz.samtuit.maroqandObod.model.Admin;
-import uz.samtuit.maroqandObod.model.AdminState;
-import uz.samtuit.maroqandObod.model.Org;
-import uz.samtuit.maroqandObod.model.OrgInfo;
+import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.AdminService;
 import uz.samtuit.maroqandObod.service.OrgInfoService;
 import uz.samtuit.maroqandObod.service.OrgService;
@@ -264,14 +261,19 @@ public class BotAdminService {
         ));
         sb.append(inn);
 
-        if (orgInfo.getOrg() == null) {
+        Org org = orgInfo.getOrg();
+        if (org == null) {
+            sb.append("⚠️          ");
+            controller(sb, entities, orgInfo);
+            return;
+        }
+        if (org.getOrgState() != OrgState.READY && org.getOrgState() != OrgState.BLOCKED) {
             sb.append("⚠️          ");
             controller(sb, entities, orgInfo);
             return;
         }
         sb.append("          ");
 
-        Org org = orgInfo.getOrg();
         String status = (org.isFilled() ? " ♻️ " : " \uD83D\uDDD1 ");
         sb.append(status);
 
