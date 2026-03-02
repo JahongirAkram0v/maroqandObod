@@ -7,6 +7,12 @@ import uz.samtuit.maroqandObod.model.Org;
 import uz.samtuit.maroqandObod.model.OrgState;
 import uz.samtuit.maroqandObod.service.OrgService;
 
+import java.util.List;
+import java.util.Map;
+
+import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.LOCATION_ORG;
+import static uz.samtuit.maroqandObod.model.OrgState.LOCATION;
+
 @Component
 @RequiredArgsConstructor
 public class SingUpService {
@@ -21,9 +27,12 @@ public class SingUpService {
                 if (message.hasContact()) {
                     String phoneNumber = message.getContact().getPhoneNumber();
                     org.setPhoneNumber(phoneNumber);
-                    org.setOrgState(OrgState.LOCATION);
+                    org.setOrgState(LOCATION);
                     orgService.save(org);
-                    sendService.send(Utils.location(org.getChatId(), "joylashuv ma'lumotlarini kiriting"), "sendMessage");
+                    String locationText = "\uD83D\uDCCD Iltimos, joylashuv ma’lumotlaringizni yuboring.";
+                    sendService.send(Utils.text(org.getChatId(), locationText,
+                            List.of(List.of(Map.of("text", LOCATION_ORG,"request_location", true))
+                    )), "sendMessage");
                 }
             }
             case LOCATION -> {
@@ -32,7 +41,7 @@ public class SingUpService {
                     org.setLongitude(message.getLocation().getLongitude());
                     org.setOrgState(OrgState.IMAGE);
                     orgService.save(org);
-                    sendService.send(Utils.removeKeyboard(org.getChatId(), "rasm yuboring"), "sendMessage");
+                    sendService.send(Utils.removeKeyboard(org.getChatId(), "\uD83D\uDCF8 Iltimos, konteynerlar joylashgan joydan rasm yuboring."), "sendMessage");
                 }
             }
             case IMAGE -> {
@@ -41,7 +50,7 @@ public class SingUpService {
                     org.setImageId(fileId);
                     org.setOrgState(OrgState.CONTAINER_COUNT);
                     orgService.save(org);
-                    sendService.send(Utils.text(org.getChatId(), "kontaynerlar sonini yuboring"), "sendMessage");
+                    sendService.send(Utils.text(org.getChatId(), "\uD83D\uDCE6 Konteynerlar sonini yuboring.\n(masalan: 2)"), "sendMessage");
                 }
             }
             case CONTAINER_COUNT -> {
@@ -51,7 +60,7 @@ public class SingUpService {
                         org.setContainerCount(containerCount);
                         org.setOrgState(OrgState.READY);
                         orgService.save(org);
-                        sendService.send(Utils.orgKeyboard(org.getChatId(), "ro'yxatdan o'tdingiz", org.isFilled()), "sendMessage");
+                        sendService.send(Utils.org(org.getChatId(), "\uD83C\uDF89 Tabriklaymiz! Ro‘yxatdan o‘tish yakunlandi.", org.isFilled()), "sendMessage");
                     } else {
                         sendService.send(Utils.text(org.getChatId(), "kontaynerlar sonini to'g'ri yuboring"), "sendMessage");
                     }

@@ -220,7 +220,7 @@ public class BotAdminService {
                     org.setFilled(false);
                     orgService.save(org);
                     sendService.send(
-                            Utils.orgKeyboard(org.getChatId(), "Chiqindi olib ketildi", false),
+                            Utils.org(org.getChatId(), "Chiqindi olib ketildi", false),
                             "sendMessage");
                     sendService.send(Utils.text(admin.getId(), "Ma'lumot yangilandi"), "sendMessage");
                 }
@@ -286,7 +286,7 @@ public class BotAdminService {
                         "url", "https://t.me/" + botUsername + "?start=share_" + orgInfo.getId().trim()
                 )
         );
-        sb.append(share).append(" ");
+        sb.append(share).append(" • ");
 
         if (org.isFilled()) {
             String done = "☑️";
@@ -298,7 +298,7 @@ public class BotAdminService {
                             "url", "https://t.me/" + botUsername + "?start=done_" + orgInfo.getId().trim()
                     )
             );
-            sb.append(done).append("  ");
+            sb.append(done).append("  • ");
         }
 
         controller(sb, entities, orgInfo);
@@ -314,7 +314,7 @@ public class BotAdminService {
                         "url", "https://t.me/" + botUsername + "?start=edit_" + orgInfo.getId().trim()
                 )
         );
-        sb.append(edit);
+        sb.append(edit).append(" • ");
 
         String delete = "❌";
         entities.add(

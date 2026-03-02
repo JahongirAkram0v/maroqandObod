@@ -16,7 +16,11 @@ import uz.samtuit.maroqandObod.service.AdminService;
 import uz.samtuit.maroqandObod.service.OrgInfoService;
 import uz.samtuit.maroqandObod.service.OrgService;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.CONTACT;
 
 @Component
 @RequiredArgsConstructor
@@ -59,67 +63,74 @@ public class MyBot extends TelegramWebhookBot {
                         botAdminService.handleAdminMessage(admin, message.getText());
                     }
                 }
+                return null;
+            }
+
+            Optional<Org> optionalOrg = orgService.findByChatId(chatId);
+            if (optionalOrg.isPresent()) {
+                Org org = optionalOrg.get();
+                OrgState orgState = org.getOrgState();
+
+                if (orgState != OrgState.READY && orgState != OrgState.BLOCKED) {
+                    singUpService.handleOrgMessage(org, message);
+                    return null;
+                }
+                if (message.hasText()) {
+                    botOrgService.handleOrgMessage(org, message.getText());
+                }
+
             }
             else {
-                Optional<Org> optionalOrg = orgService.findByChatId(chatId);
-                if (optionalOrg.isPresent()) {
-                    Org org = optionalOrg.get();
-                    OrgState orgState = org.getOrgState();
-
-                    if (orgState != OrgState.READY && orgState != OrgState.BLOCKED) {
-                        singUpService.handleOrgMessage(org, message);
-                        return null;
-                    }
-                    if (message.hasText()) {
-                        botOrgService.handleOrgMessage(org, message.getText());
-                    }
-
+                //auth
+                if (!message.hasText()) return null;
+                String text = message.getText();
+                if (text.equals("/start")) {
+                    sendService.send(Utils.text(chatId, "Assalomu alaykum, botga xush kelibsiz!"), "sendMessage");
+                    String msg =
+                            """
+                                    📝 Ro‘yxatdan o‘tish uchun INN va parolni quyidagi formatda kiriting:
+                                    
+                                    123456789
+                                    password
+                                    """;
+                    sendService.send(Utils.text(chatId, msg), "sendMessage");
+                    return null;
                 }
-                else {
-                    //auth
-                    if (!message.hasText()) return null;
-                    String text = message.getText();
-                    if (text.equals("/start")) {
-                        sendService.send(Utils.text(
-                                        chatId,
-                                        "Iltimos, ro'yxatdan o'tish uchun INN va parolni kiriting"),
-                                "sendMessage");
-                        return null;
-                    }
-                    String[] texts = text.split("\n");
-                    if (texts.length != 2) {
-                        sendService.send(Utils.text(
-                                        chatId,
-                                        "Iltimos, INN va parolni to'g'ri formatda kiriting"),
-                                "sendMessage");
-                        return null;
-                    }
-                    Optional<OrgInfo> newOptionalOrgInfo = orgInfoService.findByInnAndPassword(texts[0], texts[1]);
-                    if (newOptionalOrgInfo.isEmpty()) {
-                        sendService.send(Utils.text(
-                                        chatId,
-                                        "INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring"),
-                                "sendMessage");
-                        return null;
-                    }
-                    OrgInfo orgInfo = newOptionalOrgInfo.get();
-                    if (orgInfo.getOrg() != null) {
-                        sendService.send(Utils.text(
-                                        chatId,
-                                        "Bu INN bilan ro'yxatdan o'tilgan, iltimos boshqa INN bilan urinib ko'ring"),
-                                "sendMessage");
-                        return null;
-                    }
+                String[] texts = text.split("\n");
+                if (texts.length != 2) {
+                    sendService.send(Utils.text(
+                                    chatId,
+                                    "Iltimos, INN va parolni to'g'ri formatda kiriting"),
+                            "sendMessage");
+                    return null;
+                }
+                Optional<OrgInfo> newOptionalOrgInfo = orgInfoService.findByInnAndPassword(texts[0], texts[1]);
+                if (newOptionalOrgInfo.isEmpty()) {
+                    sendService.send(Utils.text(
+                                    chatId,
+                                    "INN yoki parol noto'g'ri, iltimos qayta urinib ko'ring"),
+                            "sendMessage");
+                    return null;
+                }
+                OrgInfo orgInfo = newOptionalOrgInfo.get();
+                if (orgInfo.getOrg() == null) {
                     Org org = Org.builder()
                             .orgInfo(orgInfo)
                             .chatId(chatId)
                             .build();
                     orgService.save(org);
-                    sendService.send(Utils.contact(
-                            chatId,
-                            "Siz tasdiqlandingiz, iltimos, telefon raqamingizni yuboring"),
-                            "sendMessage");
+                } else {
+                    Org org = orgInfo.getOrg();
+                    org.setChatId(chatId);
+                    orgService.save(org);
                 }
+
+
+                String contactText = "✅ Tasdiqlandi. Iltimos, telefon raqamingizni yuboring yoki" +
+                        " “\uD83D\uDCF2 Kontaktni ulashish” tugmasini bosing.";
+                sendService.send(Utils.text(chatId, contactText,
+                        List.of(List.of(Map.of("text", CONTACT,"request_contact", true))
+                )), "sendMessage");
             }
         }
 
