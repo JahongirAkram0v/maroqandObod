@@ -3,6 +3,8 @@ package uz.samtuit.maroqandObod.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +23,6 @@ public class OrgInfo {
 
     @OneToOne(mappedBy = "orgInfo", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Org org;
+    @Builder.Default
+    private LocalDateTime createdDate = LocalDateTime.now();
 }

@@ -19,7 +19,7 @@ public class OrgInfoService {
     }
 
     public List<OrgInfo> findAll() {
-        return orgInfoRepo.findAll();
+        return orgInfoRepo.findAllByOrgInfoByCreatedDateAsc();
     }
 
     public void save(OrgInfo orgInfo) {
