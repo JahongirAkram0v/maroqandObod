@@ -31,11 +31,11 @@ public class BotOrgService {
             return;
         }
         switch (text) {
-            case EMPTY_CON -> sendService.send(Utils.agreementKeyboard(org.getChatId(), "\uD83D\uDD3D Iltimos, Konteynerlar to'lganligini bildirish uchun quyidagi tugmalarni bosing."), "sendMessage");
+            case EMPTY_CON -> sendService.send(Utils.agreementKeyboard(org.getChatId(), "\uD83D\uDD3D Iltimos, Konteynerlar to'lganligini haqida ma'lumot berish uchun quyidagi tugmalardan birini bosing."), "sendMessage");
             case YES -> {
                 org.setFilled(true);
                 orgService.save(org);
-                sendService.send(Utils.org(org.getChatId(), "\uD83D\uDCE8 Ma'lumotlar dispetcherga yuborildi.", true), "sendMessage");
+                sendService.send(Utils.org(org.getChatId(), "\uD83D\uDCE8 Konteynerlar to'lgankigi haqidagi ma'lumotlar dispetcherga yuborildi.", true), "sendMessage");
 
                 OrgInfo orgInfo = org.getOrgInfo();
                 StringBuilder sb = new StringBuilder();
