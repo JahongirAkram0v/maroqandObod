@@ -10,5 +10,5 @@ public interface OrgInfoRepo  extends JpaRepository<OrgInfo, String> {
 
     Optional<OrgInfo> findByInnAndPassword(String inn, String password);
 
-    List<OrgInfo> findAllByOrgInfoByCreatedDateAsc();
+//    List<OrgInfo> findAllByOrgInfoByCreatedDateAsc();
 }

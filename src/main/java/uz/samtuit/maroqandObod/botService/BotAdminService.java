@@ -203,7 +203,8 @@ public class BotAdminService {
                     }
                     sendService.send(Utils.sendPhoto(admin.getId(), org.getImageId(),
                             "Tashkilot nomi: " + orgInfo.getName() + "\n" +
-                                    "Telefon raqami: " + org.getPhoneNumber()
+                                    "Telefon raqami: " + org.getPhoneNumber() + "\n" +
+                                    "Konteynerlar soni: " + org.getContainerCount()
                             ), "sendPhoto");
                     sendService.send(
                             Utils.sendLocation(admin.getId(), org.getLatitude(), org.getLongitude()),

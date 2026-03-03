@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.samtuit.maroqandObod.model.Org;
 import uz.samtuit.maroqandObod.model.OrgInfo;
+import uz.samtuit.maroqandObod.model.OrgState;
 import uz.samtuit.maroqandObod.service.OrgService;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.*;
+import static uz.samtuit.maroqandObod.model.OrgState.CONTAINER_COUNT;
 
 @Component
 @RequiredArgsConstructor

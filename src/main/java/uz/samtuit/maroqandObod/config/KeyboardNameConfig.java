@@ -7,7 +7,7 @@ public class KeyboardNameConfig {
     public static final String LOCATION_ORG = "📍 Joylashuvni yuborish";
     public static final String EMPTY_CON = "\uD83D\uDDD1️ holati - bo'sh";
     public static final String FULL = "♻️ holati - to'la";
-    public static final String YES = "Qabul qilish ✅";
+    public static final String YES = "Chiqindini olib ketish ✅";
     public static final String NO = "Bekor qilish \uD83D\uDEAB";
 
 }
