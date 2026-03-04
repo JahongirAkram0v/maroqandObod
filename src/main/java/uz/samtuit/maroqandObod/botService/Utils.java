@@ -3,7 +3,7 @@ package uz.samtuit.maroqandObod.botService;
 import java.util.List;
 import java.util.Map;
 
-import static uz.samtuit.maroqandObod.config.KeyboardNameConfig.*;
+import static uz.samtuit.maroqandObod.config.NameConfig.*;
 
 public class Utils {
 
@@ -35,7 +35,7 @@ public class Utils {
         );
     }
 
-    public static Map<String, Object> removeKeyboard(Long id, String text) {
+    public static Map<String, Object> remove(Long id, String text) {
         return Map.of(
                 "chat_id", id,
                 "text", text,
@@ -45,7 +45,7 @@ public class Utils {
         );
     }
 
-    public static Map<String, Object> sendPhoto(Long id, String fileId, String text) {
+    public static Map<String, Object> photo(Long id, String fileId, String text) {
         return Map.of(
                 "chat_id", id,
                 "photo", fileId,
@@ -53,7 +53,7 @@ public class Utils {
         );
     }
 
-    public static Map<String, Object> sendLocation(Long id, Double latitude, Double longitude) {
+    public static Map<String, Object> location(Long id, Double latitude, Double longitude) {
         return Map.of(
                 "chat_id", id,
                 "latitude", latitude,
@@ -61,38 +61,20 @@ public class Utils {
         );
     }
 
-    public static Map<String, Object> adminKeyboard(Long id, String text) {
+    public static Map<String, Object> admin(Long id, String text) {
         return text(id, text, List.of(
                         List.of(
-                                Map.of(
-                                        "text", ALL_ORG
-                                ),
-                                Map.of(
-                                        "text", ADD_ORG
-                                )
+                                Map.of("text", ALL_ORG),
+                                Map.of("text", ADD_ORG)
                         )
         ));
     }
 
-    public static Map<String, Object> org(Long id, String text, boolean isFilled) {
+    public static Map<String, Object> agreement(Long id, String text) {
         return text(id, text, List.of(
                         List.of(
-                                Map.of(
-                                        "text", isFilled ? FULL : EMPTY_CON
-                                )
-                        )
-        ));
-    }
-
-    public static Map<String, Object> agreementKeyboard(Long id, String text) {
-        return text(id, text, List.of(
-                        List.of(
-                                Map.of(
-                                        "text", YES
-                                ),
-                                Map.of(
-                                        "text", NO
-                                )
+                                Map.of("text", YES),
+                                Map.of("text", NO)
                         )
         ));
     }
