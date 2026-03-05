@@ -2,6 +2,7 @@ package uz.samtuit.maroqandObod.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uz.samtuit.maroqandObod.model.Event;
 import uz.samtuit.maroqandObod.model.User;
 import uz.samtuit.maroqandObod.repo.UserRepo;
 
@@ -12,6 +13,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepo userRepo;
+
+    public Optional<Event> findEventByUserId(String id) {
+        return userRepo.findEventByUserId(id);
+    }
+
+    public Optional<String> findUserNameById(String id) {
+        return userRepo.findUserNameById(id);
+    }
 
     public Optional<User> findByChatId(Long chatId) {
         return userRepo.findByChatId(chatId);

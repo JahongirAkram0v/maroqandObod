@@ -56,12 +56,23 @@ public class AdminHelperReferral {
             return;
         }
         User user = optionalUser.get();
-        Event event = user.getEvent();
+        Optional<Event> optionalEvent = userService.findEventByUserId(user.getId());
+        if (optionalEvent.isEmpty()) {
+            sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR), "sendMessage");
+            return;
+        }
+        Event event = optionalEvent.get();
 
         if (ins.startsWith("vol-")) {
             int index = Integer.parseInt(ins.substring(ins.indexOf("-")+1));
             int[] s = user.getS();
-            s[index] += event.getCount();
+            UserRole role = user.getRole();
+            //TODO:teginmay tursammikan
+            if (role == UserRole.USER) {
+                s[0] += 1;//ozgartirishim mumkin
+            } else {
+                s[index] += event.getCount();
+            }
             user.setS(s);
             userService.save(user);
             String vol = index == 2 ? "large" : index == 1 ? "medium" : "small";
@@ -70,11 +81,18 @@ public class AdminHelperReferral {
 
         switch (ins) {
             case "share" -> {
+                if (user.getState() != UserState.FULL) return;
+                Optional<String> optionalName = userService.findUserNameById(user.getId());
+                if (optionalName.isEmpty()) {
+                    sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR), "sendMessage");
+                    return;
+                }
+                String name = optionalName.get();
                 String caption = String.format(
                         "Tashkilot nomi: %s%n" +
                         "Telefon raqami: %s%n" +
                                 "Konteynerlar soni: %s",
-                        user.getName(),
+                        name,
                         user.getPhoneNumber(),
                         event.getCount()
                 );
@@ -119,7 +137,8 @@ public class AdminHelperReferral {
                 sendService.send(Utils.textEntity(admin.getId(), sb.toString(), entities), "sendMessage");
             }
             case "done" -> {
-                user.setFilled(false);
+                if (user.getState() != UserState.FULL) return;
+                user.setState(UserState.READY);
                 userService.save(user);
                 sendService.send(Utils.text(user.getChatId(), DONE_TEXT,
                         List.of(List.of(Map.of("text", FULL)))

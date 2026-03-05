@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uz.samtuit.maroqandObod.config.NameConfig.*;
 
@@ -61,10 +62,18 @@ public class BotUserService {
                 Event event = new Event();
                 event.setImageId(imageId);
                 user.setEvent(event);
+                //TODO: bu yerni ham o'ylab ko'raman
+                if (user.getRole() == UserRole.USER) {
+                    user.setState(UserState.LOCATION);
+                    userService.save(user);
+                    sendService.send(Utils.text(user.getChatId(), LOC_TEXT,
+                            List.of(List.of(Map.of("text", LOCATION_ORG,"request_location", true)))
+                    ), "sendMessage");
+                    return;
+                }
                 user.setState(UserState.COUNT);
                 userService.save(user);
                 sendService.send(Utils.text(user.getChatId(), COUNT_TEXT), "sendMessage");
-
             }
             case COUNT -> {
                 if (!message.hasText()) return;
@@ -72,7 +81,12 @@ public class BotUserService {
                 try {
                     int containerCount = Integer.parseInt(text);
                     if (containerCount > 0 && containerCount < 10) {
-                        Event event = user.getEvent();
+                        Optional<Event> optionalEvent = userService.findEventByUserId(user.getId());
+                        if (optionalEvent.isEmpty()) {
+                            sendService.send(Utils.text(user.getChatId(), NOT_FOUND_ERROR), "sendMessage");
+                            return;
+                        }
+                        Event event = optionalEvent.get();
                         event.setCount(containerCount);
                         user.setState(UserState.LOCATION);
                         userService.save(user);
@@ -92,18 +106,27 @@ public class BotUserService {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
 
-                Event event = user.getEvent();
+                Optional<Event> optionalEvent = userService.findEventByUserId(user.getId());
+                if (optionalEvent.isEmpty()) {
+                    sendService.send(Utils.text(user.getChatId(), NOT_FOUND_ERROR), "sendMessage");
+                    return;
+                }
+                Event event = optionalEvent.get();
                 event.setLatitude(latitude);
                 event.setLongitude(longitude);
                 event.setCreatedDate(LocalDateTime.now());
-                user.setFilled(true);
                 user.setState(UserState.FULL);
                 userService.save(user);
                 sendService.send(Utils.remove(user.getChatId(), DIS_TEXT), "sendMessage");
 
                 StringBuilder sb = new StringBuilder();
                 List<Map<String, Object>> entities = new ArrayList<>();
-                sb.append(user.getName()).append("da konteynerlar to'ldi ");
+                Optional<String> optionalName = userService.findUserNameById(user.getId());
+                if (optionalName.isEmpty()) {
+                    sendService.send(Utils.text(user.getChatId(), NOT_FOUND_ERROR), "sendMessage");
+                    return;
+                }
+                sb.append(optionalName.get()).append(" konteynerlar to'ldi ");
                 String share = "📥";
                 entities.add(
                         Map.of(
@@ -116,7 +139,6 @@ public class BotUserService {
                 sb.append(share);
                 sendService.send(Utils.textEntity(adminId, sb.toString(), entities), "sendMessage");
             }
-            case FULL -> {}
         }
 
     }

@@ -3,6 +3,7 @@ package uz.samtuit.maroqandObod.config;
 public class NameConfig {
     //error
     public static final String COUNT_ERROR = "kontaynerlar sonini to'g'ri yuboring\nMasalan: 3";
+    public static final String NOT_FOUND_ERROR = "Xatolik ketdi!";
 
     //admin keyboard
     public static final String ADD_ORG = "Tashkilot qo‘shish";
@@ -11,7 +12,7 @@ public class NameConfig {
     //admin texts
     public static final String WELCOME = "Xush kelibsiz!";
     public static final String CREATE_ORG_TEXT = "Create";
-    public static final String NOT_FOUND = "Hozircha tashkilotlar mavjud emas.";
+    public static final String NOT_FOUND_ORG = "Hozircha tashkilotlar mavjud emas.";
 
     //user keyboard
     public static final String FULL = "♻️ konteynerlar to'ldi";
@@ -19,6 +20,8 @@ public class NameConfig {
     public static final String LOCATION_ORG = "📍 Joylashuvni yuborish";
     public static final String YES = "Qabul qilish ✅";
     public static final String NO = "Bekor qilish \uD83D\uDEAB";
+    public static final String ORG_K = "Tashkilot";
+    public static final String USER_K = "Jismoniy shaxs";
 
     //user texts
     public static final String START_TEXT = "Assalomu alaykum, botga xush kelibsiz!";

@@ -22,7 +22,7 @@ public class UserInfo {
     private String password;
     private String name;
 
-    @OneToOne(mappedBy = "userInfo", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "userInfo", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User user;

@@ -26,7 +26,20 @@ public class AuthService {
         Long chatId = user.getChatId();
 
         switch (state) {
-            case ROLE -> {}
+            case START -> {
+                user.setState(UserState.ROLE);
+                userService.save(user);
+                sendService.send(Utils.text(chatId, START_TEXT), "sendMessage");//keyboard
+            }
+            case ROLE -> {
+                if (!message.hasText()) return;
+                String text = message.getText();
+
+                switch (text) {
+                    case ORG_K -> applyRoleAndAuth(user, UserRole.ORG, 3, chatId);
+                    case USER_K -> applyRoleAndAuth(user, UserRole.USER, 1, chatId);
+                }
+            }
             case AUTH -> {
                 if (!message.hasText()) return;
                 String text = message.getText().replaceAll("[^\\p{L}\\p{Nd}\\r\\n _]", "");
@@ -45,14 +58,14 @@ public class AuthService {
                     return;
                 }
                 UserInfo userInfo = optionalUserInfo.get();
+                Optional<User> optionalUser = userInfoService.findUserByUserInfoId(userInfo.getId());
 
-                if (userInfo.getUser() == null) {
-                    user.setName(userInfo.getName());
+                if (optionalUser.isEmpty()) {
                     user.setUserInfo(userInfo);
                     userService.save(user);
                 }
                 else {
-                    User oldUser = userInfo.getUser();
+                    User oldUser = optionalUser.get();
                     oldUser.setChatId(chatId);
                     userInfo.setUser(oldUser);
                     userInfoService.save(userInfo);
@@ -76,5 +89,13 @@ public class AuthService {
                 ), "sendMessage");
             }
         }
+    }
+
+    private void applyRoleAndAuth(User user, UserRole userRole, int i, Long chatId) {
+        user.setRole(userRole);
+        user.setS(new int[i]);
+        user.setState(UserState.AUTH);
+        userService.save(user);
+        sendService.send(Utils.remove(chatId, AUTH_VALID), "sendMessage");
     }
 }

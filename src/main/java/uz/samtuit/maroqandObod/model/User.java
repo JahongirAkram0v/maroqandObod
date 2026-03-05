@@ -21,9 +21,7 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.ORG;
     private String phoneNumber;
-    private String name;
 
-    private boolean isFilled;
     private boolean isAuth;
 
     @Builder.Default
@@ -33,7 +31,7 @@ public class User {
     @Builder.Default
     private UserState state = UserState.AUTH;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Event event;
 
     public void setEvent(Event newEvent) {

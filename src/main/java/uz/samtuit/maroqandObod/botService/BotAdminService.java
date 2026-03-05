@@ -75,7 +75,7 @@ public class BotAdminService {
 
             String[] columns = row.split("\\s+");
             if (columns.length != 3) {
-                String error = "Ushbu qismda xatolik mavjud: " + row;
+                String error = "Xatolik mavjud\n" + row;
                 sendService.send(Utils.text(admin.getId(), error), "sendMessage");
                 continue;
             }

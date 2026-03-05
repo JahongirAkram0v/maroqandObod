@@ -64,6 +64,7 @@ public class MyBot extends TelegramWebhookBot {
                     return u;
                 });
         if (!user.isAuth()) {
+            //delete
             if (message.hasText() && text.equals("/start")) {
                 sendService.send(Utils.text(chatId, START_TEXT), "sendMessage");
                 sendService.send(Utils.text(chatId, AUTH_VALID), "sendMessage");
