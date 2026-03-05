@@ -63,10 +63,13 @@ public class Utils {
 
     public static Map<String, Object> admin(Long id, String text) {
         return text(id, text, List.of(
-                        List.of(
-                                Map.of("text", ALL_ORG),
-                                Map.of("text", ADD_ORG)
-                        )
+                List.of(
+                        Map.of("text", ALL_ORG),
+                        Map.of("text", ADD_ORG)
+                ),
+                List.of(
+                        Map.of("text", STAT_ORG)
+                )
         ));
     }
 

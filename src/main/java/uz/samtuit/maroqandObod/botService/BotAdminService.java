@@ -42,14 +42,20 @@ public class BotAdminService {
     }
 
     private void adminSetup(String text, Admin admin) {
-        if (text.equals(ADD_ORG)) {
-            admin.setState(AdminState.CREATE_ORG);
-            adminService.save(admin);
-            sendService.send(Utils.text(admin.getId(), CREATE_ORG_TEXT), "sendMessage");
-            return;
-        }
-        if (text.equals(ALL_ORG)) {
-            adminHelperAll.handle();
+        switch (text) {
+            case ADD_ORG -> {
+                admin.setState(AdminState.CREATE_ORG);
+                adminService.save(admin);
+                sendService.send(Utils.text(admin.getId(), CREATE_ORG_TEXT), "sendMessage");
+                return;
+            }
+            case ALL_ORG -> {
+                adminHelperAll.handle();
+                return;
+            }
+            case STAT_ORG -> {
+                statOrg(admin.getId());
+            }
         }
         if (text.startsWith("/start ")) {
 
@@ -62,6 +68,21 @@ public class BotAdminService {
 
             adminHelperReferral.handle(admin, ins, id);
         }
+    }
+
+    private void statOrg(Long id) {
+        List<User> users = userService.findAllAuthWithUserInfo();
+        StringBuilder sb = new StringBuilder();
+        if (users.isEmpty()) {
+            return;
+        }
+        for (User user : users) {
+            int[] stat = user.getS();
+            sb.append(user.getUserInfo().getName()).append(": ");
+            sb.append(stat[0]).append(" ").append(stat[1]).append(" ").append(stat[2]);
+            sb.append("\n");
+        }
+        sendService.send(Utils.text(id, sb.toString()), "sendMessage");
     }
 
     private void adminCreateUser(String text, Admin admin) {

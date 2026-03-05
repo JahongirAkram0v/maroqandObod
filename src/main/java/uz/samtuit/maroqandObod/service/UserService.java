@@ -6,6 +6,7 @@ import uz.samtuit.maroqandObod.model.Event;
 import uz.samtuit.maroqandObod.model.User;
 import uz.samtuit.maroqandObod.repo.UserRepo;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,9 @@ public class UserService {
 
     public Optional<User> findById(String id) {
         return userRepo.findById(id);
+    }
+
+    public List<User> findAllAuthWithUserInfo() {
+        return userRepo.findAllAuthWithUserInfo();
     }
 }

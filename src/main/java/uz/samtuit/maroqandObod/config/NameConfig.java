@@ -8,6 +8,7 @@ public class NameConfig {
     //admin keyboard
     public static final String ADD_ORG = "Tashkilot qo‘shish";
     public static final String ALL_ORG = "Tashkilotlar ro‘yxati";
+    public static final String STAT_ORG = "Tashkilotlar statistikasi";
 
     //admin texts
     public static final String WELCOME = "Xush kelibsiz!";

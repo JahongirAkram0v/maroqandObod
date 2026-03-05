@@ -73,10 +73,11 @@ public class AdminHelperAll {
         User user = optionalUser.get();
 
         if (!user.isAuth()) {
-            sb.append("⚠️");
+            sb.append(" ⚠️ ");
             controller(sb, entities, userInfoId);
             return;
         }
+        sb.append("     ");
 
         String userId = user.getId();
         boolean isFilled = user.getState() == UserState.FULL;
