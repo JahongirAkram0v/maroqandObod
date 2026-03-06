@@ -17,6 +17,14 @@ public interface UserRepo extends JpaRepository<User, String> {
     @Query("select u.event from _user u where u.id = :id")
     Optional<Event> findEventByUserId(@Param("id") String id);
 
+    @Query("""
+        select case when count(u) > 0 then true else false end
+        from _user u
+        where u.id = :id
+        and u.event.createdDate is not null
+        """)
+    boolean existsEventByUserId(@Param("id") String id);
+
     @Query("select ui.name from _user u join u.userInfo ui where u.id = :id")
     Optional<String> findUserNameById(@Param("id") String id);
 

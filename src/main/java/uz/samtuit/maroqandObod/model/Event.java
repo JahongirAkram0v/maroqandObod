@@ -3,10 +3,9 @@ package uz.samtuit.maroqandObod.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -24,7 +23,11 @@ public class Event {
     private double longitude;
 
     @Column(updatable = false)
-    private LocalDateTime createdDate;
+    private OffsetDateTime createdDate;
+
+    public void markCreatedNow() {
+        this.createdDate = OffsetDateTime.now(ZoneOffset.of("+05:00"));
+    }
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "_user_id", unique = true)

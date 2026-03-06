@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.UserService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -114,7 +113,7 @@ public class BotUserService {
                 Event event = optionalEvent.get();
                 event.setLatitude(latitude);
                 event.setLongitude(longitude);
-                event.setCreatedDate(LocalDateTime.now());
+                event.markCreatedNow();
                 user.setState(UserState.FULL);
                 userService.save(user);
                 sendService.send(Utils.remove(user.getChatId(), DIS_TEXT), "sendMessage");
@@ -138,6 +137,13 @@ public class BotUserService {
                 );
                 sb.append(share);
                 sendService.send(Utils.textEntity(adminId, sb.toString(), entities), "sendMessage");
+            }
+            case BLOCK -> {
+                user.setState(UserState.READY);
+                userService.save(user);
+                sendService.send(Utils.text(user.getChatId(), BLOCK_TEXT,
+                        List.of(List.of(Map.of("text", FULL)))
+                ), "sendMessage");
             }
         }
 

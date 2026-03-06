@@ -32,7 +32,7 @@ public class AdminHelperReferral {
         if (ins.equals("edit")) {
             Optional<UserInfo> optionalUserInfo = userInfoService.findById(id);
             if (optionalUserInfo.isEmpty()) {
-                sendService.send(Utils.text(admin.getId(), "Edit qilishda xatolik ketdi"), "sendMessage");
+                sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR_USERINFO), "sendMessage");
                 return;
             }
             UserInfo userInfo = optionalUserInfo.get();
@@ -52,13 +52,20 @@ public class AdminHelperReferral {
 
         Optional<User> optionalUser = userService.findById(id);
         if (optionalUser.isEmpty()) {
-            sendService.send(Utils.text(admin.getId(), "Xatolik ketdi"), "sendMessage");
+            sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR_USER), "sendMessage");
             return;
         }
         User user = optionalUser.get();
+        if (ins.equals("stat")) {
+            int[] s = user.getS();
+            String stat = "small: " + s[0] + ", medium: " + s[1] + ", large: " + s[2];
+            sendService.send(Utils.text(admin.getId(), stat), "sendMessage");
+            return;
+        }
+
         Optional<Event> optionalEvent = userService.findEventByUserId(user.getId());
         if (optionalEvent.isEmpty()) {
-            sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR), "sendMessage");
+            sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR_EVENT), "sendMessage");
             return;
         }
         Event event = optionalEvent.get();
@@ -77,6 +84,7 @@ public class AdminHelperReferral {
             userService.save(user);
             String vol = index == 2 ? "large" : index == 1 ? "medium" : "small";
             sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
+            return;
         }
 
         switch (ins) {
@@ -137,18 +145,14 @@ public class AdminHelperReferral {
                 sendService.send(Utils.textEntity(admin.getId(), sb.toString(), entities), "sendMessage");
             }
             case "done" -> {
-                if (user.getState() != UserState.FULL) return;
+                if (!userService.existsEventByUserId(user.getId())) return;
+                user.setEvent(null);
                 user.setState(UserState.READY);
                 userService.save(user);
                 sendService.send(Utils.text(user.getChatId(), DONE_TEXT,
                         List.of(List.of(Map.of("text", FULL)))
                 ), "sendMessage");
                 sendService.send(Utils.text(admin.getId(), "Ma'lumot yangilandi"), "sendMessage");
-            }
-            case "stat" -> {
-                int[] s = user.getS();
-                String stat = "small: " + s[0] + ", medium: " + s[1] + ", large: " + s[2];
-                sendService.send(Utils.text(admin.getId(), stat), "sendMessage");
             }
         }
 

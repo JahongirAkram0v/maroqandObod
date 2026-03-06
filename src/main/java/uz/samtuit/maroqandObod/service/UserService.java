@@ -19,6 +19,10 @@ public class UserService {
         return userRepo.findEventByUserId(id);
     }
 
+    public boolean existsEventByUserId(String id) {
+        return userRepo.existsEventByUserId(id);
+    }
+
     public Optional<String> findUserNameById(String id) {
         return userRepo.findUserNameById(id);
     }

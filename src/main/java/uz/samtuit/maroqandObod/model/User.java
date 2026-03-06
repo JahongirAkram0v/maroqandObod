@@ -36,12 +36,13 @@ public class User {
 
     public void setEvent(Event newEvent) {
         if (this.event != null) {
-            this.event.setUser(null);
+            Event oldEvent = this.event;
+            this.event = null;
+            oldEvent.setUser(null);
         }
 
-        this.event = newEvent;
-
         if (newEvent != null) {
+            this.event = newEvent;
             newEvent.setUser(this);
         }
     }

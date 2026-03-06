@@ -7,6 +7,7 @@ import uz.samtuit.maroqandObod.model.User;
 import uz.samtuit.maroqandObod.model.UserInfo;
 import uz.samtuit.maroqandObod.model.UserState;
 import uz.samtuit.maroqandObod.service.UserInfoService;
+import uz.samtuit.maroqandObod.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class AdminHelperAll {
     private final Long adminId = Long.parseLong(dotenv.get("TELEGRAM_ADMIN_ID"));
 
     private final UserInfoService userInfoService;
+    private final UserService userService;
     private final SendService sendService;
 
     public void handle() {
@@ -66,21 +68,21 @@ public class AdminHelperAll {
 
         Optional<User> optionalUser = userInfoService.findUserByUserInfoId(userInfoId);
         if (optionalUser.isEmpty()) {
-            sb.append("⚠️");
+            sb.append("  ⚠️ ");
             controller(sb, entities, userInfoId);
             return;
         }
         User user = optionalUser.get();
 
         if (!user.isAuth()) {
-            sb.append(" ⚠️ ");
+            sb.append("  ⚠️ ");
             controller(sb, entities, userInfoId);
             return;
         }
         sb.append("     ");
 
         String userId = user.getId();
-        boolean isFilled = user.getState() == UserState.FULL;
+        boolean isFilled = userService.existsEventByUserId(userId);
 
         String status = (isFilled ? " ♻️ " : " \uD83D\uDDD1 ");
         sb.append(status);

@@ -3,7 +3,8 @@ package uz.samtuit.maroqandObod.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Builder
 @NoArgsConstructor
@@ -28,12 +29,12 @@ public class UserInfo {
     private User user;
 
     @Column(updatable = false)
-    private LocalDateTime createdDate;
+    private OffsetDateTime createdDate;
 
     @PrePersist
     public void prePersist() {
         if (createdDate == null) {
-            createdDate = LocalDateTime.now();
+            createdDate = OffsetDateTime.now(ZoneOffset.of("+05:00"));
         }
     }
 }

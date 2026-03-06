@@ -1,12 +1,10 @@
 package uz.samtuit.maroqandObod.botService;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.*;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static uz.samtuit.maroqandObod.config.NameConfig.*;
@@ -14,9 +12,6 @@ import static uz.samtuit.maroqandObod.config.NameConfig.*;
 @Component
 @RequiredArgsConstructor
 public class BotAdminService {
-
-    private final Dotenv dotenv = Dotenv.load();
-    private final String botUsername = dotenv.get("TELEGRAM_BOT_USERNAME");
 
     private final SendService sendService;
     private final AdminService adminService;
@@ -53,9 +48,7 @@ public class BotAdminService {
                 adminHelperAll.handle();
                 return;
             }
-            case STAT_ORG -> {
-                statOrg(admin.getId());
-            }
+            case STAT_ORG -> statOrg(admin.getId());
         }
         if (text.startsWith("/start ")) {
 
@@ -111,7 +104,6 @@ public class BotAdminService {
                     .login(login)
                     .name(name)
                     .password(password)
-                    .createdDate(LocalDateTime.now())
                     .build();
             userInfoService.save(userInfo);
         }
@@ -128,8 +120,7 @@ public class BotAdminService {
 
         String[] columns = text.split("\\s+");
         if (columns.length != 3) {
-            String error = "Iltimos, ma'lumotlarni to'g'ri formatda yuboring!";
-            sendService.send(Utils.text(admin.getId(), error), "sendMessage");
+            sendService.send(Utils.text(admin.getId(), FORMAT_ERROR), "sendMessage");
             return;
         }
         String id = admin.getEditId();
@@ -143,8 +134,7 @@ public class BotAdminService {
             admin.setState(AdminState.SETUP);
             admin.setEditId(null);
             adminService.save(admin);
-            String error = "Xatolik ketdi, qaytadan urinib ko'ring";
-            sendService.send(Utils.text(admin.getId(), error), "sendMessage");
+            sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR_USERINFO), "sendMessage");
             return;
         }
         UserInfo userInfo = optionalUserInfo.get();

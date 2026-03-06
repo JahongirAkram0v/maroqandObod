@@ -3,7 +3,11 @@ package uz.samtuit.maroqandObod.config;
 public class NameConfig {
     //error
     public static final String COUNT_ERROR = "kontaynerlar sonini to'g'ri yuboring\nMasalan: 3";
+    public static final String NOT_FOUND_ERROR_USER = "Xatolik ketdi! | user";
+    public static final String NOT_FOUND_ERROR_EVENT = "Xatolik ketdi! | event";
+    public static final String NOT_FOUND_ERROR_USERINFO = "Xatolik ketdi! | userinfo";
     public static final String NOT_FOUND_ERROR = "Xatolik ketdi!";
+    public static final String FORMAT_ERROR = "Iltimos, ma'lumotlarni to'g'ri formatda yuboring!";
 
     //admin keyboard
     public static final String ADD_ORG = "Tashkilot qo‘shish";
@@ -41,12 +45,14 @@ public class NameConfig {
             """;
     public static final String IMAGE_TEXT = """
             Konteynerlar joylashgan joydan rasm yuboring.
-            Rasmda konteynerlar to'liq ko'rinishiga e'tibor bering, sababi rasm orqali chiqindilar tavsiflanadi
+            Rasmda konteynerlar va chiqindilar to'liq ko'rinishiga e'tibor bering, sababi rasm orqali chiqindi hajmi aniqlanadi
             """;
     public static final String NO_TEXT = "Konteyner to'lganida xabar berishingiz mumkin";
     public static final String COUNT_TEXT = "To'lgan konteynerlar soni kiriting.\n(Masalan: 2)";
     public static final String LOC_TEXT = "Konteynerlar joylashgan joydan lokatsiya jo'nating";
     public static final String DIS_TEXT = "Ma'lumotlar dispetcherga yuborildi, 3 ish kun ichida chiqindilar olib ketiladi";
     public static final String DONE_TEXT = "Chiqindilar olib ketildi!";
+    public static final String TIME_TEXT = "Hozir ish vaqti emas!";
+    public static final String BLOCK_TEXT = "Qaytib kelganingizdan xursandmiz";
 
 }
