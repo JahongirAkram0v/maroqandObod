@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
 
-import uz.samtuit.maroqandObod.botService.*;
+import uz.samtuit.maroqandObod.bot.*;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.AdminService;
 import uz.samtuit.maroqandObod.service.UserService;

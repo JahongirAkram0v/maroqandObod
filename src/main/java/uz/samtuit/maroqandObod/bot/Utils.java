@@ -1,4 +1,4 @@
-package uz.samtuit.maroqandObod.botService;
+package uz.samtuit.maroqandObod.bot;
 
 import java.util.List;
 import java.util.Map;

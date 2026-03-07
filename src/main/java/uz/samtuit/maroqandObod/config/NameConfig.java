@@ -53,6 +53,5 @@ public class NameConfig {
     public static final String DIS_TEXT = "Ma'lumotlar dispetcherga yuborildi, 3 ish kun ichida chiqindilar olib ketiladi";
     public static final String DONE_TEXT = "Chiqindilar olib ketildi!";
     public static final String TIME_TEXT = "Hozir ish vaqti emas!";
-    public static final String BLOCK_TEXT = "Qaytib kelganingizdan xursandmiz";
 
 }

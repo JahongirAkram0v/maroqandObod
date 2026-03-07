@@ -1,4 +1,4 @@
-package uz.samtuit.maroqandObod.botService;
+package uz.samtuit.maroqandObod.bot;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

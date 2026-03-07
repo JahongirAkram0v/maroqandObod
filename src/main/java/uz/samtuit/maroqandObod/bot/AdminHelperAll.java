@@ -1,4 +1,4 @@
-package uz.samtuit.maroqandObod.botService;
+package uz.samtuit.maroqandObod.bot;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
