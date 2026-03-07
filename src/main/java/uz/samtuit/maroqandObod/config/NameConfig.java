@@ -16,7 +16,10 @@ public class NameConfig {
 
     //admin texts
     public static final String WELCOME = "Xush kelibsiz!";
-    public static final String CREATE_ORG_TEXT = "Create";
+    public static final String CREATE_ORG_TEXT = """
+            Tashkilot yaratishingiz mumkin, Misol uchun:
+            123456789 Tashkilot_nomi password
+            """;
     public static final String NOT_FOUND_ORG = "Hozircha tashkilotlar mavjud emas.";
 
     //user keyboard
@@ -44,14 +47,15 @@ public class NameConfig {
             “Bekor qilish \uD83D\uDEAB” tugmasi bosish orqali xabar berishni bekor qilishingiz mumkin!
             """;
     public static final String IMAGE_TEXT = """
-            Konteynerlar joylashgan joydan rasm yuboring.
-            Rasmda konteynerlar va chiqindilar to'liq ko'rinishiga e'tibor bering, sababi rasm orqali chiqindi hajmi aniqlanadi
+            📸 Konteynerlar joylashgan joydan rasm yuboring.
+            Iltimos, rasmda konteynerlar hamda atrofdagi chiqindilar to‘liq va aniq ko‘rinsin. ♻️
+            Sababi, aynan rasm orqali chiqindilar hajmi baholanadi. 📏
             """;
-    public static final String NO_TEXT = "Konteyner to'lganida xabar berishingiz mumkin";
+    public static final String NO_TEXT = "♻️ Konteyner to‘lganda xabar berishingiz mumkin.";
     public static final String COUNT_TEXT = "To'lgan konteynerlar soni kiriting.\n(Masalan: 2)";
     public static final String LOC_TEXT = "Konteynerlar joylashgan joydan lokatsiya jo'nating";
-    public static final String DIS_TEXT = "Ma'lumotlar dispetcherga yuborildi, 3 ish kun ichida chiqindilar olib ketiladi";
-    public static final String DONE_TEXT = "Chiqindilar olib ketildi!";
-    public static final String TIME_TEXT = "Hozir ish vaqti emas!";
+    public static final String DIS_TEXT = "✅ So‘rovingiz dispetcherga yuborildi. Chiqindilar 3 ish kuni ichida olib ketiladi. \uD83D\uDE9B";
+    public static final String DONE_TEXT = "\uD83D\uDE9B Chiqindilar olib chiqib ketildi!";
+    public static final String TIME_TEXT = "⏰ Hozir ish vaqti emas. Iltimos, ish vaqtida murojaat qiling.";
 
 }
