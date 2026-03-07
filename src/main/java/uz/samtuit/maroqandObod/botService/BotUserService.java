@@ -3,8 +3,8 @@ package uz.samtuit.maroqandObod.botService;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Location;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.location.Location;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.UserService;
 
@@ -137,13 +137,6 @@ public class BotUserService {
                 );
                 sb.append(share);
                 sendService.send(Utils.textEntity(adminId, sb.toString(), entities), "sendMessage");
-            }
-            case BLOCK -> {
-                user.setState(UserState.READY);
-                userService.save(user);
-                sendService.send(Utils.text(user.getChatId(), BLOCK_TEXT,
-                        List.of(List.of(Map.of("text", FULL)))
-                ), "sendMessage");
             }
         }
 

@@ -3,11 +3,12 @@ package uz.samtuit.maroqandObod;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.bots.TelegramWebhookBot;
-import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.objects.ChatMemberUpdated;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethod;
+import org.telegram.telegrambots.webhook.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
+
 import uz.samtuit.maroqandObod.botService.*;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.AdminService;
@@ -16,17 +17,17 @@ import uz.samtuit.maroqandObod.service.UserService;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 import static uz.samtuit.maroqandObod.config.NameConfig.*;
 
 @Component
 @RequiredArgsConstructor
-public class MyBot extends TelegramWebhookBot {
+public class MyBot implements TelegramWebhookBot {
 
     private final Dotenv dotenv = Dotenv.load();
-    private final String botUsername = dotenv.get("TELEGRAM_BOT_USERNAME");
     private final String botWebhookPath = dotenv.get("TELEGRAM_BOT_WEBHOOK_PATH");
-    private final String adminId = dotenv.get("TELEGRAM_ADMIN_ID");
+    private final Long adminId = Long.parseLong(dotenv.get("TELEGRAM_ADMIN_ID"));
     //
     private final OffsetTime startTime = OffsetTime.of(8, 0, 0, 0, ZoneOffset.of("+05:00"));
     private final OffsetTime endTime = OffsetTime.of(17, 0, 0, 0, ZoneOffset.of("+05:00"));
@@ -41,14 +42,18 @@ public class MyBot extends TelegramWebhookBot {
     private final BotUserService botUserService;
 
     @Override
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+    public BotApiMethod<?> consumeUpdate(Update update) {
 
-        if (update.hasChatMember()) {
+        if (update.hasMyChatMember()) {
             ChatMemberUpdated chatMemberUpdated = update.getMyChatMember();
-            String oldStatus = chatMemberUpdated.getOldChatMember().getStatus();
-            String status = chatMemberUpdated.getNewChatMember().getStatus();
-            System.out.println(status);
-            System.out.println(oldStatus);
+            String newStatus = chatMemberUpdated.getNewChatMember().getStatus();
+            Long chatId = chatMemberUpdated.getChat().getId();
+            Optional<User> optionalUser = userService.findByChatId(chatId);
+            if (optionalUser.isEmpty()) return null;
+            User user = optionalUser.get();
+            UserState state = newStatus.equals("kicked") ? UserState.BLOCK : UserState.READY;
+            user.setState(state);
+            userService.save(user);
         }
         if (!update.hasMessage()) return null;
 
@@ -56,17 +61,17 @@ public class MyBot extends TelegramWebhookBot {
         Long chatId = message.getChatId();
         String text = message.getText();
 
-        if (adminId.equals(chatId.toString())) {
+        if (adminId.equals(chatId)) {
             if (!message.hasText()) return null;
 
             Admin admin = adminService.findById(chatId)
-                        .orElseGet(() -> {
-                            Admin a = Admin.builder()
-                                    .id(chatId)
-                                    .build();
-                            adminService.save(a);
-                            return a;
-                        });
+                    .orElseGet(() -> {
+                        Admin a = Admin.builder()
+                                .id(chatId)
+                                .build();
+                        adminService.save(a);
+                        return a;
+                    });
             botAdminService.handle(admin, message.getText());
             return null;
         }
@@ -100,7 +105,6 @@ public class MyBot extends TelegramWebhookBot {
             sendService.send(Utils.text(chatId, TIME_TEXT), "sendMessage");
         }
 
-
         return null;
     }
 
@@ -110,7 +114,12 @@ public class MyBot extends TelegramWebhookBot {
     }
 
     @Override
-    public String getBotUsername() {
-        return botUsername;
+    public void runDeleteWebhook() {
+
+    }
+
+    @Override
+    public void runSetWebhook() {
+
     }
 }

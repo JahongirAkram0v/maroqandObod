@@ -83,7 +83,9 @@ public class AdminHelperReferral {
             user.setS(s);
             userService.save(user);
             String vol = index == 2 ? "large" : index == 1 ? "medium" : "small";
-            sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
+            if (user.getState() != UserState.BLOCK) {
+                sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
+            }
             return;
         }
 
@@ -149,9 +151,12 @@ public class AdminHelperReferral {
                 user.setEvent(null);
                 user.setState(UserState.READY);
                 userService.save(user);
-                sendService.send(Utils.text(user.getChatId(), DONE_TEXT,
-                        List.of(List.of(Map.of("text", FULL)))
-                ), "sendMessage");
+                if (user.getState() != UserState.BLOCK) {
+                    sendService.send(Utils.text(user.getChatId(), DONE_TEXT,
+                            List.of(List.of(Map.of("text", FULL)))
+                    ), "sendMessage");
+                }
+
                 sendService.send(Utils.text(admin.getId(), "Ma'lumot yangilandi"), "sendMessage");
             }
         }

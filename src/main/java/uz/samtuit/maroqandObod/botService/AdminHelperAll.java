@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.samtuit.maroqandObod.model.User;
 import uz.samtuit.maroqandObod.model.UserInfo;
-import uz.samtuit.maroqandObod.model.UserState;
 import uz.samtuit.maroqandObod.service.UserInfoService;
 import uz.samtuit.maroqandObod.service.UserService;
 

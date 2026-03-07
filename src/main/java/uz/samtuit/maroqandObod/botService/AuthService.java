@@ -2,7 +2,7 @@ package uz.samtuit.maroqandObod.botService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 import uz.samtuit.maroqandObod.model.*;
 import uz.samtuit.maroqandObod.service.UserInfoService;
 import uz.samtuit.maroqandObod.service.UserService;
