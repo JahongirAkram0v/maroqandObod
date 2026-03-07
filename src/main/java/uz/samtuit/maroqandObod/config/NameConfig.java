@@ -10,9 +10,9 @@ public class NameConfig {
     public static final String FORMAT_ERROR = "Iltimos, ma'lumotlarni to'g'ri formatda yuboring!";
 
     //admin keyboard
-    public static final String ADD_ORG = "Tashkilot qo‘shish";
-    public static final String ALL_ORG = "Tashkilotlar ro‘yxati";
-    public static final String STAT_ORG = "Tashkilotlar statistikasi";
+    public static final String ADD_ORG = "➕ \uD83C\uDFE2 Yangi tashkilot";
+    public static final String ALL_ORG = "\uD83D\uDCCB Tashkilotlar ro‘yxati";
+    public static final String STAT_ORG = "\uD83D\uDCC8 Statistika";
 
     //admin texts
     public static final String WELCOME = "Xush kelibsiz!";
