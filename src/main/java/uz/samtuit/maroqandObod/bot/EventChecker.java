@@ -4,10 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import uz.samtuit.maroqandObod.model.Event;
 import uz.samtuit.maroqandObod.service.EventService;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,9 +18,9 @@ public class EventChecker {
 
     @Scheduled(cron = "30 0 17 * * MON-SAT", zone = "Asia/Tashkent")
     public void checkEvents() {
-        List<Event> events = eventService.findAll();
-        if (events.isEmpty()) return;
-        String text = "⚠️ " + events.size() + "ta tashkilotda chiqindi bor! ⚠️";
+        Long count = eventService.count();
+        if (count == 0) return;
+        String text = "⚠️ " + count + "ta tashkilotda chiqindi bor! ⚠️";
         sendService.send(Utils.text(adminId, text), "sendMessage");
     }
 }

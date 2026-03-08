@@ -30,6 +30,7 @@ public class AdminHelperReferral {
     public void handle(Admin admin, String ins, String id) {
 
         if (ins.equals("edit")) {
+            //password qismini oylashim kerak
             Optional<UserInfo> optionalUserInfo = userInfoService.findById(id);
             if (optionalUserInfo.isEmpty()) {
                 sendService.send(Utils.text(admin.getId(), NOT_FOUND_ERROR_USERINFO), "sendMessage");
@@ -70,6 +71,7 @@ public class AdminHelperReferral {
         }
         Event event = optionalEvent.get();
 
+        //
         if (ins.startsWith("vol-")) {
             int index = Integer.parseInt(ins.substring(ins.indexOf("-")+1));
             int[] s = user.getS();
@@ -147,8 +149,7 @@ public class AdminHelperReferral {
                 sendService.send(Utils.textEntity(admin.getId(), sb.toString(), entities), "sendMessage");
             }
             case "done" -> {
-                if (!userService.existsEventByUserId(user.getId())) return;
-                user.setEvent(null);
+                if (event.getCreatedDate() == null) return;
                 user.setState(UserState.READY);
                 userService.save(user);
                 if (user.getState() != UserState.BLOCK) {

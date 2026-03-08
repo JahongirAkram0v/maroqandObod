@@ -19,6 +19,7 @@ public class UserInfo {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false, unique = true)
     private String login;
     private String password;
     private String name;

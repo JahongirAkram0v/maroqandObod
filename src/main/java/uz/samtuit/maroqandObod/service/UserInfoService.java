@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uz.samtuit.maroqandObod.model.User;
 import uz.samtuit.maroqandObod.model.UserInfo;
+import uz.samtuit.maroqandObod.model.UserInfoDto;
 import uz.samtuit.maroqandObod.repo.UserInfoRepo;
 
 import java.util.List;
@@ -27,8 +28,8 @@ public class UserInfoService {
         userInfoRepo.save(userInfo);
     }
 
-    public List<UserInfo> findAll() {
-        return userInfoRepo.findAll();
+    public List<UserInfoDto> findAllDto() {
+        return userInfoRepo.findAllDto();
     }
 
     public Optional<UserInfo> findById(String id) {

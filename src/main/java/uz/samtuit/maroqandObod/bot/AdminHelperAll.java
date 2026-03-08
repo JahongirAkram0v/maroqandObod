@@ -3,15 +3,12 @@ package uz.samtuit.maroqandObod.bot;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uz.samtuit.maroqandObod.model.User;
-import uz.samtuit.maroqandObod.model.UserInfo;
+import uz.samtuit.maroqandObod.model.UserInfoDto;
 import uz.samtuit.maroqandObod.service.UserInfoService;
-import uz.samtuit.maroqandObod.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static uz.samtuit.maroqandObod.config.NameConfig.NOT_FOUND_ORG;
 
@@ -24,11 +21,10 @@ public class AdminHelperAll {
     private final Long adminId = Long.parseLong(dotenv.get("TELEGRAM_ADMIN_ID"));
 
     private final UserInfoService userInfoService;
-    private final UserService userService;
     private final SendService sendService;
 
     public void handle() {
-        List<UserInfo> userInfos = userInfoService.findAll();
+        List<UserInfoDto> userInfos = userInfoService.findAllDto();
         //sort
         StringBuilder sb = new StringBuilder();
         List<Map<String, Object>> entities = new ArrayList<>();
@@ -46,8 +42,8 @@ public class AdminHelperAll {
                 "length", title.length()
         ));
 
-        for (UserInfo userInfo : userInfos) {
-            appendUserLine(sb, entities, userInfo);
+        for (UserInfoDto userInfoDto : userInfos) {
+            appendUserLine(sb, entities, userInfoDto);
         }
 
         sendService.send(
@@ -59,29 +55,27 @@ public class AdminHelperAll {
     private void appendUserLine(
             StringBuilder sb,
             List<Map<String, Object>> entities,
-            UserInfo userInfo
+            UserInfoDto userInfoDto
     ) {
 
-        String userInfoId = userInfo.getId();
-        sb.append(userInfo.getLogin());
+        String userInfoId = userInfoDto.getId();
+        sb.append(userInfoDto.getLogin());
 
-        Optional<User> optionalUser = userInfoService.findUserByUserInfoId(userInfoId);
-        if (optionalUser.isEmpty()) {
+        if (userInfoDto.getUserId() == null) {
             sb.append("  ⚠️ ");
             controller(sb, entities, userInfoId);
             return;
         }
-        User user = optionalUser.get();
 
-        if (!user.isAuth()) {
+        if (!userInfoDto.getIsAuth()) {
             sb.append("  ⚠️ ");
             controller(sb, entities, userInfoId);
             return;
         }
         sb.append("     ");
 
-        String userId = user.getId();
-        boolean isFilled = userService.existsEventByUserId(userId);
+        String userId = userInfoDto.getUserId();
+        Boolean isFilled = userInfoDto.getIsFilled();
 
         String status = (isFilled ? " ♻️ " : " \uD83D\uDDD1 ");
         sb.append(status);

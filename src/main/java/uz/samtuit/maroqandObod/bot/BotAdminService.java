@@ -64,14 +64,14 @@ public class BotAdminService {
     }
 
     private void statOrg(Long id) {
-        List<User> users = userService.findAllAuthWithUserInfo();
+        List<AuthUserDto> users = userService.findAllAuthWithUserInfo();
         StringBuilder sb = new StringBuilder();
         if (users.isEmpty()) {
             return;
         }
-        for (User user : users) {
+        for (AuthUserDto user : users) {
             int[] stat = user.getS();
-            sb.append(user.getUserInfo().getName()).append(": ");
+            sb.append(user.getName()).append(": ");
             sb.append(stat[0]).append(" ").append(stat[1]).append(" ").append(stat[2]);
             sb.append("\n");
         }
