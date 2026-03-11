@@ -22,7 +22,6 @@ public class Event {
     private double latitude;
     private double longitude;
 
-    @Column(updatable = false)
     private OffsetDateTime createdDate;
 
     public void markCreatedNow() {

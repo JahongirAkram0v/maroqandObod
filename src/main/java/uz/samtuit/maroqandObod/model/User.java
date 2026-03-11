@@ -18,9 +18,10 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private Long chatId;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Builder.Default
     private UserRole role = UserRole.ORG;
+    @Column(length = 9)
     private String phoneNumber;
 
     private boolean isAuth;
@@ -28,7 +29,7 @@ public class User {
     @Builder.Default
     private int[] s = new int[3];
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Builder.Default
     private UserState state = UserState.AUTH;
 

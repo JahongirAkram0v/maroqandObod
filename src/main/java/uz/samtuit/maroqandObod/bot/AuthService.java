@@ -80,7 +80,7 @@ public class AuthService {
             case PHONE_NUMBER -> {
                 if (!message.hasContact()) return;
                 String phoneNumber = message.getContact().getPhoneNumber();
-                user.setPhoneNumber(phoneNumber);
+                user.setPhoneNumber(phoneNumber.substring(3));
                 user.setAuth(true);
                 user.setState(UserState.READY);
                 userService.save(user);

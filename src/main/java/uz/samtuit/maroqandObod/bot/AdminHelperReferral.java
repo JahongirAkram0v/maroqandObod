@@ -150,6 +150,7 @@ public class AdminHelperReferral {
             }
             case "done" -> {
                 if (event.getCreatedDate() == null) return;
+                user.setEvent(null);
                 user.setState(UserState.READY);
                 userService.save(user);
                 if (user.getState() != UserState.BLOCK) {

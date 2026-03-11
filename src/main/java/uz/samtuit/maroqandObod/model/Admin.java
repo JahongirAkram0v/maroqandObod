@@ -16,7 +16,7 @@ public class Admin {
 
     @Id
     private Long id;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Builder.Default
     private AdminState state = AdminState.SETUP;
     private String editId;
