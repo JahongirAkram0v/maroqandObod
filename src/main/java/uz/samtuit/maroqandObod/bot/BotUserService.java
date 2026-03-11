@@ -33,6 +33,12 @@ public class BotUserService {
             case READY -> {
                 if (!message.hasText()) return;
                 String text = message.getText();
+                if (text.equals("/start")) {
+                    sendService.send(Utils.text(user.getChatId(), START_TEXT,
+                            List.of(List.of(Map.of("text", FULL)))
+                    ), "sendMessage");
+                    return;
+                }
                 if (!text.equals(FULL)) return;
                 sendService.send(Utils.agreement(user.getChatId(), AGREEMENT), "sendMessage");
                 user.setState(UserState.CHOOSE);

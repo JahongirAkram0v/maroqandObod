@@ -39,4 +39,8 @@ public class UserService {
     public List<AuthUserDto> findAllAuthWithUserInfo() {
         return userRepo.findAllAuthWithUserInfo();
     }
+
+    public List<User> findAll() {
+        return userRepo.findAll();
+    }
 }

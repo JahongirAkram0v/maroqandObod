@@ -36,8 +36,8 @@ public class AuthService {
                 String text = message.getText();
 
                 switch (text) {
-                    case ORG_K -> applyRoleAndAuth(user, UserRole.ORG, 3, chatId);
-                    case USER_K -> applyRoleAndAuth(user, UserRole.USER, 1, chatId);
+                    case ORG_K -> applyRoleAndAuth(user, UserRole.ORG, 6, chatId);
+                    case USER_K -> applyRoleAndAuth(user, UserRole.USER, 2, chatId);
                 }
             }
             case AUTH -> {

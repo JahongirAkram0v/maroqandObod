@@ -16,8 +16,8 @@ public class BotAdminService {
     private final SendService sendService;
     private final AdminService adminService;
 
-    private final UserService userService;
     private final UserInfoService userInfoService;
+    private final AdminStat adminStat;
 
     private final AdminHelperAll adminHelperAll;
     private final AdminHelperReferral adminHelperReferral;
@@ -48,7 +48,7 @@ public class BotAdminService {
                 adminHelperAll.handle();
                 return;
             }
-            case STAT_ORG -> statOrg(admin.getId());
+            case STAT_ORG -> adminStat.handle();
         }
         if (text.startsWith("/start ")) {
 
@@ -61,21 +61,6 @@ public class BotAdminService {
 
             adminHelperReferral.handle(admin, ins, id);
         }
-    }
-
-    private void statOrg(Long id) {
-        List<AuthUserDto> users = userService.findAllAuthWithUserInfo();
-        StringBuilder sb = new StringBuilder();
-        if (users.isEmpty()) {
-            return;
-        }
-        for (AuthUserDto user : users) {
-            int[] stat = user.getS();
-            sb.append(user.getName()).append(": ");
-            sb.append(stat[0]).append(" ").append(stat[1]).append(" ").append(stat[2]);
-            sb.append("\n");
-        }
-        sendService.send(Utils.text(id, sb.toString()), "sendMessage");
     }
 
     private void adminCreateUser(String text, Admin admin) {

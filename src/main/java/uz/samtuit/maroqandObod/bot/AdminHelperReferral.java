@@ -78,7 +78,7 @@ public class AdminHelperReferral {
             UserRole role = user.getRole();
             //TODO:teginmay tursammikan
             if (role == UserRole.USER) {
-                s[0] += 1;//ozgartirishim mumkin
+                s[1] += 1;//ozgartirishim mumkin
             } else {
                 s[index] += event.getCount();
             }
@@ -123,7 +123,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", small.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-0_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-3_" + user.getId()
                         )
                 );
                 sb.append(small).append(" ");
@@ -133,7 +133,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", medium.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-1_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-4_" + user.getId()
                         )
                 );
                 sb.append(medium).append(" ");
@@ -143,7 +143,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", large.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-2_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-5_" + user.getId()
                         )
                 );
                 sb.append(large);
@@ -151,6 +151,17 @@ public class AdminHelperReferral {
             }
             case "done" -> {
                 if (event.getCreatedDate() == null) return;
+                int[] s = user.getS();
+                UserRole role = user.getRole();
+                //TODO:teginmay tursammikan
+                if (role == UserRole.USER) {
+                    s[0] = s[1];
+                } else {
+                    s[0] = s[3];
+                    s[1] = s[4];
+                    s[2] = s[5];
+                }
+                user.setS(s);
                 user.setEvent(null);
                 user.setState(UserState.READY);
                 userService.save(user);

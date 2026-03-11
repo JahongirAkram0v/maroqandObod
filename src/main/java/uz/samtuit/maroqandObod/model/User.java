@@ -27,7 +27,7 @@ public class User {
     private boolean isAuth;
 
     @Builder.Default
-    private int[] s = new int[3];
+    private int[] s = new int[6];
 
     @Enumerated(EnumType.ORDINAL)
     @Builder.Default
