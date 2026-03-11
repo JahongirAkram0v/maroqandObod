@@ -85,6 +85,7 @@ public class AdminHelperReferral {
             user.setS(s);
             userService.save(user);
             String vol = index == 2 ? "large" : index == 1 ? "medium" : "small";
+            sendService.send(Utils.text(admin.getId(), "Ma'lumotlar yuborildi"), "sendMessage");
             if (user.getState() != UserState.BLOCK) {
                 sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
             }
