@@ -84,7 +84,7 @@ public class AdminHelperReferral {
             }
             user.setS(s);
             userService.save(user);
-            String vol = index == 2 ? "large" : index == 1 ? "medium" : "small";
+            String vol = index == 5 ? "large" : index == 4 ? "medium" : "small";
             sendService.send(Utils.text(admin.getId(), "Ma'lumotlar yuborildi"), "sendMessage");
             if (user.getState() != UserState.BLOCK) {
                 sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
@@ -123,7 +123,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", small.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-0_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-3_" + user.getId()
                         )
                 );
                 sb.append(small).append(" ");
@@ -133,7 +133,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", medium.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-1_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-4_" + user.getId()
                         )
                 );
                 sb.append(medium).append(" ");
@@ -143,7 +143,7 @@ public class AdminHelperReferral {
                                 "type", "text_link",
                                 "offset", sb.length(),
                                 "length", large.length(),
-                                "url", "https://t.me/" + botUsername + "?start=vol-2_" + user.getId()
+                                "url", "https://t.me/" + botUsername + "?start=vol-5_" + user.getId()
                         )
                 );
                 sb.append(large);
