@@ -84,7 +84,7 @@ public class AdminHelperReferral {
             }
             user.setS(s);
             userService.save(user);
-            String vol = index == 5 ? "large" : index == 4 ? "medium" : "small";
+            String vol = index == 5 ? "Yirik" : index == 4 ? "O'rta" : "Kichik";
             sendService.send(Utils.text(admin.getId(), "Ma'lumotlar yuborildi"), "sendMessage");
             if (user.getState() != UserState.BLOCK) {
                 sendService.send(Utils.text(user.getChatId(), vol + " mashina yuborildi"), "sendMessage");
@@ -117,7 +117,7 @@ public class AdminHelperReferral {
                 StringBuilder sb = new StringBuilder();
                 List<Map<String, Object>> entities = new ArrayList<>();
                 sb.append("Yuboriladigan yukmashina turini tanlang: ");
-                String small = "small";
+                String small = "Kichik";
                 entities.add(
                         Map.of(
                                 "type", "text_link",
@@ -127,7 +127,7 @@ public class AdminHelperReferral {
                         )
                 );
                 sb.append(small).append(" ");
-                String medium = "medium";
+                String medium = "O'rta";
                 entities.add(
                         Map.of(
                                 "type", "text_link",
@@ -137,7 +137,7 @@ public class AdminHelperReferral {
                         )
                 );
                 sb.append(medium).append(" ");
-                String large = "large";
+                String large = "Yirik";
                 entities.add(
                         Map.of(
                                 "type", "text_link",
